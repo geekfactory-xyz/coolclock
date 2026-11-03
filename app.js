@@ -1858,7 +1858,9 @@
   }
 
   function openFullscreenStudio(sourceHint) {
-    const src = sourceHint || state.activeTab || 'clock';
+    const validSources = ['clock', 'pomodoro', 'timer', 'stopwatch', 'world'];
+    const rawSrc = sourceHint || state.activeTab || 'clock';
+    const src = validSources.includes(rawSrc) ? rawSrc : 'clock';
     fs.source = src;
 
     // Pick smart initial fullscreen mode based on context
@@ -3309,6 +3311,217 @@
   }
 
   /* ==========================================================================
+     9D. CONTACT FORM (FORMSPREE + HCAPTCHA + DIRECT EMAIL)
+     ========================================================================== */
+  const CONTACT_EMAIL = 'coolclock@geek-factory.xyz';
+
+  const contactEl = {
+    copyBtn: document.getElementById('copy-contact-email-btn'),
+    form: document.getElementById('contact-form'),
+    hiddenSubject: document.getElementById('contact-hidden-subject'),
+    nameIn: document.getElementById('contact-name'),
+    emailIn: document.getElementById('contact-email'),
+    catSelect: document.getElementById('contact-category'),
+    subjectIn: document.getElementById('contact-subject'),
+    messageIn: document.getElementById('contact-message'),
+    charCount: document.getElementById('contact-char-count'),
+    captchaFileHint: document.getElementById('contact-captcha-file-hint'),
+    statusBox: document.getElementById('contact-form-status'),
+    submitBtn: document.getElementById('contact-submit-btn'),
+  };
+
+  let contactCaptchaToken = '';
+
+  window.onCoolClockHCaptchaSuccess = function (token) {
+    contactCaptchaToken = token || '';
+    if (contactEl.statusBox && contactEl.statusBox.dataset.errKind === 'captcha') {
+      contactEl.statusBox.classList.add('hidden');
+    }
+  };
+
+  window.onCoolClockHCaptchaExpired = function () {
+    contactCaptchaToken = '';
+  };
+
+  if (contactEl.captchaFileHint && window.location.protocol === 'file:') {
+    contactEl.captchaFileHint.classList.remove('hidden');
+  }
+
+  function showContactStatus(type, htmlOrText, isHtml = false, errKind = '') {
+    if (!contactEl.statusBox) return;
+    contactEl.statusBox.className = `contact-status is-${type}`;
+    contactEl.statusBox.dataset.errKind = errKind;
+    if (isHtml) {
+      contactEl.statusBox.innerHTML = htmlOrText;
+    } else {
+      contactEl.statusBox.textContent = htmlOrText;
+    }
+    contactEl.statusBox.classList.remove('hidden');
+  }
+
+  function updateContactCharCount() {
+    if (!contactEl.messageIn || !contactEl.charCount) return;
+    const len = contactEl.messageIn.value.length;
+    contactEl.charCount.textContent = `${len} / 3000`;
+  }
+
+  if (contactEl.messageIn) {
+    contactEl.messageIn.addEventListener('input', updateContactCharCount);
+  }
+
+  if (contactEl.copyBtn) {
+    let copyTimer = null;
+    contactEl.copyBtn.addEventListener('click', () => {
+      const done = () => {
+        contactEl.copyBtn.textContent = t('contact.emailCopied');
+        if (copyTimer) clearTimeout(copyTimer);
+        copyTimer = setTimeout(() => {
+          contactEl.copyBtn.textContent = t('contact.copyEmail');
+        }, 2200);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(CONTACT_EMAIL).then(done).catch(done);
+      } else {
+        const tmp = document.createElement('textarea');
+        tmp.value = CONTACT_EMAIL;
+        document.body.appendChild(tmp);
+        tmp.select();
+        try {
+          document.execCommand('copy');
+        } catch (_) {}
+        document.body.removeChild(tmp);
+        done();
+      }
+    });
+  }
+
+  if (contactEl.form) {
+    contactEl.form.addEventListener('reset', () => {
+      setTimeout(() => {
+        updateContactCharCount();
+        contactCaptchaToken = '';
+        if (contactEl.statusBox) {
+          contactEl.statusBox.classList.add('hidden');
+        }
+        if (window.hcaptcha && typeof window.hcaptcha.reset === 'function') {
+          try {
+            window.hcaptcha.reset();
+          } catch (_) {}
+        }
+      }, 0);
+    });
+
+    contactEl.form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(contactEl.form);
+      // Honeypot check
+      if (formData.get('_gotcha')) {
+        return;
+      }
+
+      const nameVal = (contactEl.nameIn.value || '').trim();
+      const emailVal = (contactEl.emailIn.value || '').trim();
+      const subjectVal = (contactEl.subjectIn.value || '').trim();
+      const messageVal = (contactEl.messageIn.value || '').trim();
+      const categoryVal = contactEl.catSelect ? contactEl.catSelect.value : 'suggestion';
+      const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal);
+
+      if (!nameVal || !emailValid || !subjectVal || !messageVal) {
+        showContactStatus('error', t('contact.err.fields'), false, 'fields');
+        return;
+      }
+
+      // Verify hCaptcha token
+      let token = contactCaptchaToken || String(formData.get('h-captcha-response') || '').trim();
+      if (!token && window.hcaptcha && typeof window.hcaptcha.getResponse === 'function') {
+        try {
+          token = window.hcaptcha.getResponse();
+        } catch (_) {}
+      }
+
+      if (!token) {
+        showContactStatus('error', t('contact.err.captcha'), false, 'captcha');
+        return;
+      }
+
+      formData.set('h-captcha-response', token);
+      formData.set('_replyto', emailVal);
+      const formattedSubject = `[CoolClock • ${categoryVal}] ${subjectVal}`;
+      formData.set('_subject', formattedSubject);
+      if (contactEl.hiddenSubject) {
+        contactEl.hiddenSubject.value = formattedSubject;
+      }
+
+      const endpoint = (contactEl.form.getAttribute('action') || '').trim();
+      const isPlaceholderEndpoint =
+        !endpoint ||
+        endpoint.includes('VOTRE_ID_FORMSPREE') ||
+        endpoint.includes('YOUR_FORMSPREE_ID');
+
+      if (isPlaceholderEndpoint) {
+        const mailtoBody = `${messageVal}\n\n---\n${nameVal} (${emailVal})`;
+        const mailtoHref = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
+          formattedSubject
+        )}&body=${encodeURIComponent(mailtoBody)}`;
+        showContactStatus(
+          'info',
+          t('contact.info.placeholderEndpoint', { mailto: mailtoHref }),
+          true,
+          'placeholder'
+        );
+        return;
+      }
+
+      if (contactEl.submitBtn) {
+        contactEl.submitBtn.disabled = true;
+        contactEl.submitBtn.textContent = t('contact.submitting');
+      }
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            Accept: 'application/json',
+          },
+        });
+
+        if (res.ok) {
+          contactEl.form.reset();
+          updateContactCharCount();
+          contactCaptchaToken = '';
+          if (window.hcaptcha && typeof window.hcaptcha.reset === 'function') {
+            try {
+              window.hcaptcha.reset();
+            } catch (_) {}
+          }
+          showContactStatus('success', t('contact.success'), false, '');
+        } else {
+          const data = await res.json().catch(() => null);
+          const serverErr =
+            data && Array.isArray(data.errors) && data.errors.length > 0
+              ? data.errors.map((item) => item.message).join(' • ')
+              : '';
+          if (serverErr) {
+            showContactStatus('error', serverErr, false, 'server');
+          } else {
+            showContactStatus('error', t('contact.err.network'), true, 'network');
+          }
+        }
+      } catch (_) {
+        showContactStatus('error', t('contact.err.network'), true, 'network');
+      } finally {
+        if (contactEl.submitBtn) {
+          contactEl.submitBtn.disabled = false;
+          contactEl.submitBtn.textContent = t('contact.submitBtn');
+        }
+      }
+    });
+  }
+
+  /* ==========================================================================
      10. KEYBOARD SHORTCUTS
      ========================================================================== */
   document.addEventListener('keydown', (e) => {
@@ -3370,6 +3583,7 @@
       if (e.key === '3') switchTab('timer');
       if (e.key === '4') switchTab('stopwatch');
       if (e.key === '5') switchTab('world');
+      if (e.key === '6') switchTab('contact');
     }
 
     if (e.code === 'Space') {

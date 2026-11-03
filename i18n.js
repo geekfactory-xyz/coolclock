@@ -22,6 +22,8 @@ window.COOLCLOCK_I18N = {
     'nav.stopwatch.title': 'Chronomètre (4)',
     'nav.world': 'Monde',
     'nav.world.title': 'Horloges Mondiales (5)',
+    'nav.contact': 'Contact',
+    'nav.contact.title': 'Contact & Support (6)',
 
     // Language & Theme & Focus Header Actions
     'lang.aria': 'Sélecteur de langue',
@@ -358,9 +360,49 @@ window.COOLCLOCK_I18N = {
     'alarm.multiTimerTitle': 'Minuteur terminé !',
     'alarm.multiTimerMsg': '« {name} » est terminé.',
 
+    // Section 6: Contact (Formspree + hCaptcha + Direct Email)
+    'contact.eyebrow': 'Support & Suggestions',
+    'contact.title': 'Contactez CoolClock',
+    'contact.desc':
+      'Une idée de fonctionnalité, un bug à signaler, une question ou une proposition ? Écrivez-nous via le formulaire sécurisé ou directement par courriel.',
+    'contact.emailLabel': 'Courriel officiel :',
+    'contact.copyEmail': '📋 Copier l’adresse',
+    'contact.emailCopied': '✓ Adresse copiée !',
+    'contact.openMailClient': '↗ Ouvrir dans ma messagerie',
+    'contact.badge.hcaptcha': 'Protection anti-spam et anti-robot par hCaptcha.',
+    'contact.badge.formspree': 'Transmission chiffrée HTTPS via Formspree.',
+    'contact.badge.privacy': 'Vos coordonnées servent uniquement à vous répondre.',
+    'contact.formTitle': 'Envoyer un message',
+    'contact.field.name': 'Nom ou pseudo *',
+    'contact.field.namePh': 'Ex. Alexandre',
+    'contact.field.email': 'Votre adresse courriel *',
+    'contact.field.emailPh': 'vous@exemple.com',
+    'contact.field.category': 'Sujet *',
+    'contact.cat.suggestion': '💡 Suggestion / Idée',
+    'contact.cat.bug': '🐛 Signaler un bug',
+    'contact.cat.support': '🙋 Question / Aide',
+    'contact.cat.other': '🤝 Partenariat / Autre',
+    'contact.field.subject': 'Objet du message *',
+    'contact.field.subjectPh': 'Résumé en quelques mots...',
+    'contact.field.message': 'Message *',
+    'contact.field.messagePh': 'Décrivez votre demande, suggestion ou retour en détail...',
+    'contact.captcha.label': '🛡️ Vérification de sécurité hCaptcha *',
+    'contact.captcha.fileWarn':
+      '⚠️ Page ouverte en local (file://) : hCaptcha requiert un domaine HTTP/HTTPS (ex. localhost ou geek-factory.xyz) pour valider le jeton de sécurité.',
+    'contact.submitBtn': '📨 Envoyer le message',
+    'contact.submitting': '⏳ Envoi en cours...',
+    'contact.err.fields': 'Veuillez remplir tous les champs obligatoires avec une adresse courriel valide.',
+    'contact.err.captcha': 'Veuillez valider la vérification de sécurité hCaptcha avant d’envoyer votre message.',
+    'contact.err.network':
+      'Impossible d’envoyer le message pour le moment. Vous pouvez aussi nous écrire directement à <a href="mailto:coolclock@geek-factory.xyz">coolclock@geek-factory.xyz</a>.',
+    'contact.info.placeholderEndpoint':
+      '⚙️ Configuration Formspree requise : remplacez <code>VOTRE_ID_FORMSPREE</code> dans l’attribut <code>action</code> du formulaire par votre identifiant Formspree. En attendant, <a href="{mailto}">cliquez ici pour envoyer votre message pré-rempli à coolclock@geek-factory.xyz</a>.',
+    'contact.success':
+      '✓ Merci ! Votre message a bien été envoyé. Nous vous répondrons très vite depuis coolclock@geek-factory.xyz.',
+
     // Footer & Copyright
     'footer.shortcutsHtml':
-      '<strong>CoolClock</strong> • Raccourcis : <kbd>1</kbd>-<kbd>5</kbd> Onglets • <kbd>Espace</kbd> Démarrer/Pause • <kbd>M</kbd> Sons & Musique • <kbd>P</kbd> Plein Écran • <kbd>T</kbd> Thème • <kbd>F</kbd> Concentration • <kbd>L</kbd> Langue',
+      '<strong>CoolClock</strong> • Raccourcis : <kbd>1</kbd>-<kbd>6</kbd> Onglets • <kbd>Espace</kbd> Démarrer/Pause • <kbd>M</kbd> Sons & Musique • <kbd>P</kbd> Plein Écran • <kbd>T</kbd> Thème • <kbd>F</kbd> Concentration • <kbd>L</kbd> Langue',
     'footer.copyright': '© 2026 CoolClock. Tous droits réservés.',
     'footer.trademarks':
       'Spotify®, Apple Music® et Deezer™ sont des marques déposées de leurs propriétaires respectifs.',
@@ -451,6 +493,8 @@ window.COOLCLOCK_I18N = {
     'nav.stopwatch.title': 'Stopwatch (4)',
     'nav.world': 'World',
     'nav.world.title': 'World Clocks (5)',
+    'nav.contact': 'Contact',
+    'nav.contact.title': 'Contact & Support (6)',
 
     // Language & Theme & Focus Header Actions
     'lang.aria': 'Language switcher',
@@ -786,9 +830,49 @@ window.COOLCLOCK_I18N = {
     'alarm.multiTimerTitle': 'Timer finished!',
     'alarm.multiTimerMsg': '"{name}" has finished.',
 
+    // Section 6: Contact (Formspree + hCaptcha + Direct Email)
+    'contact.eyebrow': 'Support & Feedback',
+    'contact.title': 'Contact CoolClock',
+    'contact.desc':
+      'Have a feature idea, a bug report, a question, or a proposal? Reach out via our secure form or directly by email.',
+    'contact.emailLabel': 'Official email:',
+    'contact.copyEmail': '📋 Copy address',
+    'contact.emailCopied': '✓ Address copied!',
+    'contact.openMailClient': '↗ Open in mail app',
+    'contact.badge.hcaptcha': 'Anti-spam & bot protection powered by hCaptcha.',
+    'contact.badge.formspree': 'Encrypted HTTPS submission via Formspree.',
+    'contact.badge.privacy': 'Your contact details are only used to reply to you.',
+    'contact.formTitle': 'Send a message',
+    'contact.field.name': 'Name or handle *',
+    'contact.field.namePh': 'e.g. Alex',
+    'contact.field.email': 'Your email address *',
+    'contact.field.emailPh': 'you@example.com',
+    'contact.field.category': 'Topic *',
+    'contact.cat.suggestion': '💡 Feature Idea / Suggestion',
+    'contact.cat.bug': '🐛 Report a Bug',
+    'contact.cat.support': '🙋 Question / Help',
+    'contact.cat.other': '🤝 Partnership / Other',
+    'contact.field.subject': 'Subject *',
+    'contact.field.subjectPh': 'Brief summary...',
+    'contact.field.message': 'Message *',
+    'contact.field.messagePh': 'Describe your request, idea, or feedback in detail...',
+    'contact.captcha.label': '🛡️ hCaptcha Security Check *',
+    'contact.captcha.fileWarn':
+      '⚠️ Opened as a local file (file://): hCaptcha requires an HTTP/HTTPS domain (e.g. localhost or geek-factory.xyz) to validate security tokens.',
+    'contact.submitBtn': '📨 Send message',
+    'contact.submitting': '⏳ Sending...',
+    'contact.err.fields': 'Please fill out all required fields with a valid email address.',
+    'contact.err.captcha': 'Please complete the hCaptcha security check before sending your message.',
+    'contact.err.network':
+      'Unable to send the message right now. You can also email us directly at <a href="mailto:coolclock@geek-factory.xyz">coolclock@geek-factory.xyz</a>.',
+    'contact.info.placeholderEndpoint':
+      '⚙️ Formspree setup needed: replace <code>VOTRE_ID_FORMSPREE</code> in the form <code>action</code> attribute with your Formspree ID. Meanwhile, <a href="{mailto}">click here to send your pre-filled message to coolclock@geek-factory.xyz</a>.',
+    'contact.success':
+      '✓ Thank you! Your message has been sent. We will get back to you shortly from coolclock@geek-factory.xyz.',
+
     // Footer & Copyright
     'footer.shortcutsHtml':
-      '<strong>CoolClock</strong> • Shortcuts: <kbd>1</kbd>-<kbd>5</kbd> Tabs • <kbd>Space</kbd> Start/Pause • <kbd>M</kbd> Sounds & Music • <kbd>P</kbd> Fullscreen • <kbd>T</kbd> Theme • <kbd>F</kbd> Focus • <kbd>L</kbd> Language',
+      '<strong>CoolClock</strong> • Shortcuts: <kbd>1</kbd>-<kbd>6</kbd> Tabs • <kbd>Space</kbd> Start/Pause • <kbd>M</kbd> Sounds & Music • <kbd>P</kbd> Fullscreen • <kbd>T</kbd> Theme • <kbd>F</kbd> Focus • <kbd>L</kbd> Language',
     'footer.copyright': '© 2026 CoolClock. All rights reserved.',
     'footer.trademarks':
       'Spotify®, Apple Music®, and Deezer™ are registered trademarks of their respective owners.',

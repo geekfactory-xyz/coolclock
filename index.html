@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CoolClock — Horloges, Pomodoro, Minuteurs & Concentration</title>
   <meta name="description" id="meta-description" content="CoolClock : horloge mondiale multi-fuseaux, minuteurs interactifs, Pomodoro, chronomètre de précision et mode concentration immersif." />
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -58,6 +60,10 @@
       <button class="nav-tab" role="tab" aria-selected="false" data-tab="world" title="Horloges Mondiales (5)" data-i18n-title="nav.world.title">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14.5 14.5 0 0 1 0 18M12 3a14.5 14.5 0 0 0 0 18"/></svg>
         <span data-i18n="nav.world">Monde</span>
+      </button>
+      <button class="nav-tab" role="tab" aria-selected="false" data-tab="contact" title="Contact & Support (6)" data-i18n-title="nav.contact.title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+        <span data-i18n="nav.contact">Contact</span>
       </button>
     </nav>
 
@@ -531,6 +537,161 @@
         <!-- Populated dynamically -->
       </div>
     </section>
+
+    <!-- ==================== TAB 6: CONTACT (FORMSPREE + HCAPTCHA + DIRECT EMAIL) ==================== -->
+    <section class="tab-panel" id="panel-contact" role="tabpanel">
+      <div class="contact-layout">
+        <!-- Left Card: Direct Contact Email & Security Details -->
+        <div class="glass-card contact-info-card">
+          <div>
+            <div class="contact-eyebrow" data-i18n="contact.eyebrow">Support & Suggestions</div>
+            <h2 class="contact-title" data-i18n="contact.title">Contactez CoolClock</h2>
+            <p class="contact-desc" data-i18n="contact.desc">Une idée de fonctionnalité, un bug à signaler, une question ou une proposition ? Écrivez-nous via le formulaire sécurisé ou directement par courriel.</p>
+          </div>
+
+          <!-- Direct Email Highlight Card -->
+          <div class="contact-email-box">
+            <div class="contact-email-header">
+              <span class="contact-email-icon" aria-hidden="true">✉️</span>
+              <span class="contact-email-label" data-i18n="contact.emailLabel">Courriel officiel :</span>
+            </div>
+            <a href="mailto:coolclock@geek-factory.xyz" class="contact-email-link" id="contact-email-link">coolclock@geek-factory.xyz</a>
+            <div class="contact-email-actions">
+              <button type="button" class="ghost-sm-btn" id="copy-contact-email-btn" data-i18n="contact.copyEmail">📋 Copier l’adresse</button>
+              <a href="mailto:coolclock@geek-factory.xyz" class="ghost-sm-btn stream-ext-link" data-i18n="contact.openMailClient">↗ Ouvrir dans ma messagerie</a>
+            </div>
+          </div>
+
+          <!-- Security & Trust Highlights -->
+          <ul class="contact-highlights-list">
+            <li>
+              <span aria-hidden="true">🛡️</span>
+              <span data-i18n="contact.badge.hcaptcha">Protection anti-spam et anti-robot par hCaptcha.</span>
+            </li>
+            <li>
+              <span aria-hidden="true">📨</span>
+              <span data-i18n="contact.badge.formspree">Transmission chiffrée HTTPS via Formspree.</span>
+            </li>
+            <li>
+              <span aria-hidden="true">🔒</span>
+              <span data-i18n="contact.badge.privacy">Vos coordonnées servent uniquement à vous répondre.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Right Card: Formspree Form + hCaptcha Widget -->
+        <div class="glass-card contact-form-card">
+          <h3 class="contact-form-heading" data-i18n="contact.formTitle">Envoyer un message</h3>
+
+          <!-- Replace VOTRE_ID_FORMSPREE with your Formspree Form ID (e.g. https://formspree.io/f/xyzabcde) -->
+          <form
+            id="contact-form"
+            class="contact-form"
+            action="https://formspree.io/f/xwllwzae"
+            method="POST"
+            novalidate
+          >
+            <!-- Formspree Official Honeypot Field -->
+            <input type="text" name="_gotcha" class="contact-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+            <input type="hidden" name="_subject" id="contact-hidden-subject" value="Nouveau message — CoolClock" />
+
+            <div class="contact-form-grid">
+              <div class="contact-field">
+                <label for="contact-name" data-i18n="contact.field.name">Nom ou pseudo *</label>
+                <input
+                  type="text"
+                  id="contact-name"
+                  name="name"
+                  required
+                  maxlength="100"
+                  autocomplete="name"
+                  placeholder="Ex. Alexandre"
+                  data-i18n-placeholder="contact.field.namePh"
+                />
+              </div>
+
+              <div class="contact-field">
+                <label for="contact-email" data-i18n="contact.field.email">Votre adresse courriel *</label>
+                <input
+                  type="email"
+                  id="contact-email"
+                  name="email"
+                  required
+                  maxlength="160"
+                  autocomplete="email"
+                  placeholder="vous@exemple.com"
+                  data-i18n-placeholder="contact.field.emailPh"
+                />
+              </div>
+            </div>
+
+            <div class="contact-form-grid">
+              <div class="contact-field">
+                <label for="contact-category" data-i18n="contact.field.category">Sujet *</label>
+                <select id="contact-category" name="category">
+                  <option value="suggestion" data-i18n="contact.cat.suggestion">💡 Suggestion / Idée</option>
+                  <option value="bug" data-i18n="contact.cat.bug">🐛 Signaler un bug</option>
+                  <option value="support" data-i18n="contact.cat.support">🙋 Question / Aide</option>
+                  <option value="other" data-i18n="contact.cat.other">🤝 Partenariat / Autre</option>
+                </select>
+              </div>
+
+              <div class="contact-field">
+                <label for="contact-subject" data-i18n="contact.field.subject">Objet du message *</label>
+                <input
+                  type="text"
+                  id="contact-subject"
+                  name="subject"
+                  required
+                  maxlength="140"
+                  placeholder="Résumé en quelques mots..."
+                  data-i18n-placeholder="contact.field.subjectPh"
+                />
+              </div>
+            </div>
+
+            <div class="contact-field">
+              <div class="contact-label-row">
+                <label for="contact-message" data-i18n="contact.field.message">Message *</label>
+                <span class="contact-char-count" id="contact-char-count">0 / 3000</span>
+              </div>
+              <textarea
+                id="contact-message"
+                name="message"
+                rows="5"
+                required
+                maxlength="3000"
+                placeholder="Décrivez votre demande, suggestion ou retour en détail..."
+                data-i18n-placeholder="contact.field.messagePh"
+              ></textarea>
+            </div>
+
+            <!-- hCaptcha Security Verification -->
+            <div class="contact-captcha-section">
+              <div class="contact-captcha-label" data-i18n="contact.captcha.label">🛡️ Vérification de sécurité hCaptcha *</div>
+              <!-- Replace data-sitekey below with your production hCaptcha sitekey configured in Formspree -->
+              <div
+                class="h-captcha"
+                id="contact-hcaptcha"
+                data-sitekey="e6c010dc-1252-4df0-9e6c-1b4269405562"
+                data-theme="dark"
+                data-callback="onCoolClockHCaptchaSuccess"
+                data-expired-callback="onCoolClockHCaptchaExpired"
+              ></div>
+              <p class="contact-captcha-file-hint hidden" id="contact-captcha-file-hint" data-i18n="contact.captcha.fileWarn"></p>
+            </div>
+
+            <!-- Status / Feedback Banner -->
+            <div class="contact-status hidden" id="contact-form-status" role="status" aria-live="polite"></div>
+
+            <div class="contact-submit-row">
+              <button type="submit" class="primary-pill-btn contact-submit-btn" id="contact-submit-btn" data-i18n="contact.submitBtn">📨 Envoyer le message</button>
+              <button type="reset" class="secondary-pill-btn" id="contact-reset-btn" data-i18n="common.reset">Réinitialiser</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
   </main>
 
   <!-- ==================== MULTI-MODE FULLSCREEN STUDIO ==================== -->
@@ -952,9 +1113,11 @@
 
   <!-- Keyboard Shortcuts Hint & Copyright Footer -->
   <footer class="app-footer">
-    <div class="footer-shortcuts" data-i18n-html="footer.shortcutsHtml"><strong>CoolClock</strong> • Raccourcis : <kbd>1</kbd>-<kbd>5</kbd> Onglets • <kbd>Espace</kbd> Démarrer/Pause • <kbd>M</kbd> Sons & Musique • <kbd>P</kbd> Plein Écran • <kbd>T</kbd> Thème • <kbd>F</kbd> Concentration • <kbd>L</kbd> Langue</div>
+    <div class="footer-shortcuts" data-i18n-html="footer.shortcutsHtml"><strong>CoolClock</strong> • Raccourcis : <kbd>1</kbd>-<kbd>6</kbd> Onglets • <kbd>Espace</kbd> Démarrer/Pause • <kbd>M</kbd> Sons & Musique • <kbd>P</kbd> Plein Écran • <kbd>T</kbd> Thème • <kbd>F</kbd> Concentration • <kbd>L</kbd> Langue</div>
     <div class="footer-copyright-row">
       <span class="footer-copy-main" data-i18n="footer.copyright">© 2026 CoolClock. Tous droits réservés.</span>
+      <span class="footer-copy-sep" aria-hidden="true">•</span>
+      <a href="mailto:coolclock@geek-factory.xyz" class="footer-ext-link">coolclock@geek-factory.xyz</a>
       <span class="footer-copy-sep" aria-hidden="true">•</span>
       <span class="footer-copy-tm" data-i18n="footer.trademarks">Spotify®, Apple Music® et Deezer™ sont des marques déposées de leurs propriétaires respectifs.</span>
       <span class="footer-copy-sep" aria-hidden="true">•</span>
@@ -962,6 +1125,7 @@
     </div>
   </footer>
 
+  <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   <script src="audio.js"></script>
   <script src="interactive-timers.js"></script>
   <script src="i18n.js"></script>

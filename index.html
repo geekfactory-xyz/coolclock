@@ -68,6 +68,22 @@
     </nav>
 
     <div class="topbar-actions">
+      <!-- Open-Source GitHub Repository Button -->
+      <a
+        href="https://github.com/geekfactory-xyz/coolclock"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="icon-btn github-top-btn"
+        title="Projet Open-Source — GitHub"
+        data-i18n-title="common.openSourceTitle"
+        aria-label="Projet Open-Source — GitHub"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/>
+        </svg>
+        <span class="btn-label github-top-label" data-i18n="common.openSourceBtn">Projet Open-Source</span>
+      </a>
+
       <!-- Language Switcher (FR / EN) -->
       <div class="lang-toggle" id="lang-toggle" role="group" aria-label="Sélecteur de langue" data-i18n-aria="lang.aria">
         <button type="button" class="lang-btn active" data-lang="fr" title="Français (L)" data-i18n-title="lang.fr.title">FR</button>
@@ -452,7 +468,6 @@
             <h3 data-i18n="timer.multi.title">Minuteurs simultanés</h3>
             <button class="ghost-sm-btn" id="test-sound-btn" title="Tester le son d'alarme" data-i18n-title="timer.multi.testSound.title" data-i18n="timer.multi.testSound">🔊 Tester le son</button>
           </div>
-          <p class="muted-hint" data-i18n="timer.multi.hint">Lancez plusieurs comptes à rebours en parallèle (infusion, cuisson, rappels).</p>
 
           <form class="multi-timer-form" id="multi-timer-form">
             <input type="text" id="mt-name" placeholder="Étiquette (ex: Pâtes)" data-i18n-placeholder="timer.multi.namePlaceholder" maxlength="30" required />
@@ -520,10 +535,7 @@
     <!-- ==================== 5. WORLD CLOCKS SECTION ==================== -->
     <section class="tab-panel" id="panel-world" role="tabpanel">
       <div class="glass-card world-header-card">
-        <div>
-          <h2 data-i18n="world.title">Horloges Mondiales & Fuseaux Horaires</h2>
-          <p class="muted-hint" data-i18n="world.hint">Comparez l'heure en direct à travers le monde avec indicateur jour/nuit.</p>
-        </div>
+        <h2 data-i18n="world.title">Horloges Mondiales</h2>
         <div class="world-add-controls">
           <select id="world-add-select" aria-label="Choisir un fuseau horaire à ajouter" data-i18n-aria="world.selectAria">
             <!-- Populated dynamically -->
@@ -538,52 +550,35 @@
       </div>
     </section>
 
-    <!-- ==================== TAB 6: CONTACT (FORMSPREE + HCAPTCHA + DIRECT EMAIL) ==================== -->
+    <!-- ==================== TAB 6: CONTACT ==================== -->
     <section class="tab-panel" id="panel-contact" role="tabpanel">
       <div class="contact-layout">
-        <!-- Left Card: Direct Contact Email & Security Details -->
+        <!-- Left Card: Direct Contact & Open-Source Project -->
         <div class="glass-card contact-info-card">
           <div>
-            <div class="contact-eyebrow" data-i18n="contact.eyebrow">Support & Suggestions</div>
-            <h2 class="contact-title" data-i18n="contact.title">Contactez CoolClock</h2>
-            <p class="contact-desc" data-i18n="contact.desc">Une idée de fonctionnalité, un bug à signaler, une question ou une proposition ? Écrivez-nous via le formulaire sécurisé ou directement par courriel.</p>
+            <div class="contact-eyebrow" data-i18n="contact.eyebrow">Contact & Communauté</div>
+            <h2 class="contact-title" data-i18n="contact.title">Écrivez-nous</h2>
+            <p class="contact-desc" data-i18n="contact.desc">Une idée, un bug ou une question ? Envoyez-nous un message ou contactez-nous directement par courriel.</p>
           </div>
 
           <!-- Direct Email Highlight Card -->
           <div class="contact-email-box">
             <div class="contact-email-header">
               <span class="contact-email-icon" aria-hidden="true">✉️</span>
-              <span class="contact-email-label" data-i18n="contact.emailLabel">Courriel officiel :</span>
+              <span class="contact-email-label" data-i18n="contact.emailLabel">Courriel :</span>
             </div>
             <a href="mailto:coolclock@geek-factory.xyz" class="contact-email-link" id="contact-email-link">coolclock@geek-factory.xyz</a>
             <div class="contact-email-actions">
-              <button type="button" class="ghost-sm-btn" id="copy-contact-email-btn" data-i18n="contact.copyEmail">📋 Copier l’adresse</button>
-              <a href="mailto:coolclock@geek-factory.xyz" class="ghost-sm-btn stream-ext-link" data-i18n="contact.openMailClient">↗ Ouvrir dans ma messagerie</a>
+              <button type="button" class="ghost-sm-btn" id="copy-contact-email-btn" data-i18n="contact.copyEmail">📋 Copier</button>
+              <a href="mailto:coolclock@geek-factory.xyz" class="ghost-sm-btn stream-ext-link" data-i18n="contact.openMailClient">↗ Messagerie</a>
             </div>
           </div>
-
-          <!-- Security & Trust Highlights -->
-          <ul class="contact-highlights-list">
-            <li>
-              <span aria-hidden="true">🛡️</span>
-              <span data-i18n="contact.badge.hcaptcha">Protection anti-spam et anti-robot par hCaptcha.</span>
-            </li>
-            <li>
-              <span aria-hidden="true">📨</span>
-              <span data-i18n="contact.badge.formspree">Transmission chiffrée HTTPS via Formspree.</span>
-            </li>
-            <li>
-              <span aria-hidden="true">🔒</span>
-              <span data-i18n="contact.badge.privacy">Vos coordonnées servent uniquement à vous répondre.</span>
-            </li>
-          </ul>
         </div>
 
-        <!-- Right Card: Formspree Form + hCaptcha Widget -->
+        <!-- Right Card: Contact Form -->
         <div class="glass-card contact-form-card">
           <h3 class="contact-form-heading" data-i18n="contact.formTitle">Envoyer un message</h3>
 
-          <!-- Replace VOTRE_ID_FORMSPREE with your Formspree Form ID (e.g. https://formspree.io/f/xyzabcde) -->
           <form
             id="contact-form"
             class="contact-form"
@@ -591,13 +586,12 @@
             method="POST"
             novalidate
           >
-            <!-- Formspree Official Honeypot Field -->
             <input type="text" name="_gotcha" class="contact-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
             <input type="hidden" name="_subject" id="contact-hidden-subject" value="Nouveau message — CoolClock" />
 
             <div class="contact-form-grid">
               <div class="contact-field">
-                <label for="contact-name" data-i18n="contact.field.name">Nom ou pseudo *</label>
+                <label for="contact-name" data-i18n="contact.field.name">Nom *</label>
                 <input
                   type="text"
                   id="contact-name"
@@ -611,7 +605,7 @@
               </div>
 
               <div class="contact-field">
-                <label for="contact-email" data-i18n="contact.field.email">Votre adresse courriel *</label>
+                <label for="contact-email" data-i18n="contact.field.email">Courriel *</label>
                 <input
                   type="email"
                   id="contact-email"
@@ -629,15 +623,15 @@
               <div class="contact-field">
                 <label for="contact-category" data-i18n="contact.field.category">Sujet *</label>
                 <select id="contact-category" name="category">
-                  <option value="suggestion" data-i18n="contact.cat.suggestion">💡 Suggestion / Idée</option>
-                  <option value="bug" data-i18n="contact.cat.bug">🐛 Signaler un bug</option>
-                  <option value="support" data-i18n="contact.cat.support">🙋 Question / Aide</option>
-                  <option value="other" data-i18n="contact.cat.other">🤝 Partenariat / Autre</option>
+                  <option value="suggestion" data-i18n="contact.cat.suggestion">💡 Suggestion</option>
+                  <option value="bug" data-i18n="contact.cat.bug">🐛 Bug</option>
+                  <option value="support" data-i18n="contact.cat.support">🙋 Question</option>
+                  <option value="other" data-i18n="contact.cat.other">🤝 Autre</option>
                 </select>
               </div>
 
               <div class="contact-field">
-                <label for="contact-subject" data-i18n="contact.field.subject">Objet du message *</label>
+                <label for="contact-subject" data-i18n="contact.field.subject">Objet *</label>
                 <input
                   type="text"
                   id="contact-subject"
@@ -661,15 +655,12 @@
                 rows="5"
                 required
                 maxlength="3000"
-                placeholder="Décrivez votre demande, suggestion ou retour en détail..."
+                placeholder="Votre message..."
                 data-i18n-placeholder="contact.field.messagePh"
               ></textarea>
             </div>
 
-            <!-- hCaptcha Security Verification -->
             <div class="contact-captcha-section">
-              <div class="contact-captcha-label" data-i18n="contact.captcha.label">🛡️ Vérification de sécurité hCaptcha *</div>
-              <!-- Replace data-sitekey below with your production hCaptcha sitekey configured in Formspree -->
               <div
                 class="h-captcha"
                 id="contact-hcaptcha"
@@ -678,14 +669,12 @@
                 data-callback="onCoolClockHCaptchaSuccess"
                 data-expired-callback="onCoolClockHCaptchaExpired"
               ></div>
-              <p class="contact-captcha-file-hint hidden" id="contact-captcha-file-hint" data-i18n="contact.captcha.fileWarn"></p>
             </div>
 
-            <!-- Status / Feedback Banner -->
             <div class="contact-status hidden" id="contact-form-status" role="status" aria-live="polite"></div>
 
             <div class="contact-submit-row">
-              <button type="submit" class="primary-pill-btn contact-submit-btn" id="contact-submit-btn" data-i18n="contact.submitBtn">📨 Envoyer le message</button>
+              <button type="submit" class="primary-pill-btn contact-submit-btn" id="contact-submit-btn" data-i18n="contact.submitBtn">📨 Envoyer</button>
               <button type="reset" class="secondary-pill-btn" id="contact-reset-btn" data-i18n="common.reset">Réinitialiser</button>
             </div>
           </form>
@@ -957,10 +946,8 @@
       </div>
     </div>
 
-    <!-- TAB 2: APPLE MUSIC, SPOTIFY, DEEZER & SOMAFM RADIOS INTEGRATION -->
+    <!-- TAB 2: APPLE MUSIC, SPOTIFY, DEEZER & SOMAFM RADIOS -->
     <div class="audio-drawer-body hidden" id="audio-panel-streaming">
-      <p class="stream-subtitle" data-i18n="audio.stream.subtitle">Écoutez vos playlists en entier ou les radios en direct SomaFM (sans publicité, usage non commercial).</p>
-
       <!-- Service Brand Switcher -->
       <div class="stream-service-tabs" id="stream-service-tabs" role="tablist">
         <button type="button" class="stream-svc-btn active" data-service="spotify">
@@ -990,20 +977,18 @@
         </button>
       </div>
 
-      <!-- SECTION A: SOMAFM LIVE RADIOS (NON-COMMERCIAL, ZERO ADS, DIRECT PUBLIC MP3/AAC SERVERS, CLEAR ATTRIBUTION) -->
+      <!-- SECTION A: SOMAFM LIVE RADIOS -->
       <div class="stream-radio-box hidden" id="stream-radio-box">
         <div class="stream-radio-header-row">
           <div class="mixer-section-label" data-i18n="audio.stream.radioTitle">📻 Radios en direct — SomaFM</div>
           <a href="https://somafm.com" target="_blank" rel="noopener noreferrer" class="radio-somafm-badge">somafm.com ↗</a>
         </div>
-        <p class="stream-radio-sub" data-i18n-html="audio.stream.radioSubHtml">Diffusion directe non commerciale et sans aucune insertion publicitaire depuis les serveurs publics de <a href="https://somafm.com" target="_blank" rel="noopener noreferrer">somafm.com</a>.</p>
 
-        <!-- Station Selector Pills -->
         <div class="stream-curated-list" id="stream-radio-stations">
           <!-- Populated by JS -->
         </div>
 
-        <!-- Mandatory Station Attribution & Direct Public Stream Card -->
+        <!-- Mandatory SomaFM Attribution Card -->
         <div class="stream-radio-attr-card" id="stream-radio-attr-card">
           <div class="radio-attr-main">
             <div class="radio-attr-network">
@@ -1013,26 +998,23 @@
               <a href="https://somafm.com" target="_blank" rel="noopener noreferrer" class="radio-somafm-link">somafm.com ↗</a>
             </div>
             <div class="radio-attr-station">
-              <span class="radio-attr-label" data-i18n="audio.stream.radioStationLabel">Station diffusée :</span>
+              <span class="radio-attr-label" data-i18n="audio.stream.radioStationLabel">Station :</span>
               <strong id="stream-radio-station-name">Groove Salad</strong>
               <span class="radio-attr-genre" id="stream-radio-station-desc"></span>
             </div>
           </div>
 
           <div class="radio-attr-links-row">
-            <div class="radio-codec-switch" id="stream-radio-codec-btns" role="group" aria-label="Format de flux public direct SomaFM">
-              <button type="button" class="radio-codec-btn active" data-codec="mp3">MP3 128k</button>
-              <button type="button" class="radio-codec-btn" data-codec="aac">AAC 128k</button>
+            <div class="radio-codec-switch" id="stream-radio-codec-btns" role="group" aria-label="Format audio">
+              <button type="button" class="radio-codec-btn active" data-codec="mp3">MP3</button>
+              <button type="button" class="radio-codec-btn" data-codec="aac">AAC</button>
             </div>
-            <div class="radio-direct-links">
-              <a id="stream-radio-station-link" href="https://somafm.com/groovesalad/" target="_blank" rel="noopener noreferrer" class="ghost-sm-btn stream-ext-link" data-i18n="audio.stream.radioStationPage">↗ Page de la station</a>
-              <a id="stream-radio-direct-url" href="https://ice2.somafm.com/groovesalad-128-mp3" target="_blank" rel="noopener noreferrer" class="ghost-sm-btn stream-ext-link" title="URL publique directe vers les serveurs SomaFM (aucun proxy)">🔗 Flux direct</a>
-            </div>
+            <a id="stream-radio-station-link" href="https://somafm.com/groovesalad/" target="_blank" rel="noopener noreferrer" class="ghost-sm-btn stream-ext-link" data-i18n="audio.stream.radioStationPage">↗ Station sur somafm.com</a>
           </div>
         </div>
 
         <div class="stream-radio-player-bar">
-          <button type="button" class="accent-btn" id="stream-radio-play-btn">▶ Écouter sur SomaFM</button>
+          <button type="button" class="accent-btn" id="stream-radio-play-btn">▶ Écouter</button>
           <span class="stream-live-pill hidden" id="stream-radio-live-pill" data-i18n="audio.stream.radioLive">EN DIRECT • SOMAFM</span>
           <div class="stream-radio-vol-wrap">
             <span aria-hidden="true">🎵</span>
@@ -1040,22 +1022,19 @@
           </div>
         </div>
 
-        <p class="stream-radio-terms" data-i18n-html="audio.stream.radioTermsHtml">✓ Usage strictement non commercial (aucun paywall ni monétisation) • ✓ Zéro publicité ajoutée avant, pendant ou après le flux • ✓ Connexion directe aux flux publics MP3/AAC de <a href="https://somafm.com" target="_blank" rel="noopener noreferrer">somafm.com</a> (aucun relais ni serveur proxy).</p>
+        <p class="stream-radio-terms" data-i18n-html="audio.stream.radioTermsHtml">Diffusion non commerciale et sans publicité via <a href="https://somafm.com" target="_blank" rel="noopener noreferrer">somafm.com</a>.</p>
         <audio id="stream-radio-audio" preload="none"></audio>
       </div>
 
-      <!-- SECTION B: SPOTIFY / APPLE MUSIC / DEEZER EMBED + FULL-TRACK LOGIN & POP-OUT -->
+      <!-- SECTION B: SPOTIFY / APPLE MUSIC / DEEZER -->
       <div class="stream-embed-section" id="stream-embed-section">
-        <!-- Full-Track Login & Anti-30s-Preview Box -->
         <div class="stream-auth-box" id="stream-auth-box">
-          <div class="stream-auth-title" data-i18n="audio.stream.authTitle">🔓 Bloqué en mode « Extrait 30s » ? Débloquez les titres entiers :</div>
-          <p class="stream-auth-desc" data-i18n="audio.stream.authDesc">Par sécurité, Spotify, Apple Music et Deezer ne permettent pas de taper son mot de passe dans un mini-encadré isolé. Connectez-vous via le bouton ci-dessous ou ouvrez le Mini-lecteur flottant / l’application pour écouter vos titres à 100% :</p>
-          <p class="stream-file-warn hidden" id="stream-file-warn" data-i18n="audio.stream.fileProtocolWarn"></p>
+          <div class="stream-auth-title" data-i18n="audio.stream.authTitle">🔓 Écoute intégrale (hors extraits 30s)</div>
           <div class="stream-auth-actions">
-            <button type="button" class="accent-btn stream-auth-primary" id="stream-popout-btn" data-i18n="audio.stream.popoutBtn">🪟 Mini-lecteur complet (100% entier)</button>
-            <button type="button" class="ghost-sm-btn" id="stream-native-btn">📱 Ouvrir l’app Spotify</button>
-            <button type="button" class="ghost-sm-btn" id="stream-login-btn">🔑 1. Se connecter (Spotify)</button>
-            <button type="button" class="ghost-sm-btn" id="stream-reload-btn" data-i18n="audio.stream.reloadBtn">🔄 2. Actualiser l’encadré</button>
+            <button type="button" class="accent-btn stream-auth-primary" id="stream-popout-btn" data-i18n="audio.stream.popoutBtn">🪟 Mini-lecteur complet</button>
+            <button type="button" class="ghost-sm-btn" id="stream-native-btn">📱 Ouvrir l’app</button>
+            <button type="button" class="ghost-sm-btn" id="stream-login-btn">🔑 Connexion</button>
+            <button type="button" class="ghost-sm-btn" id="stream-reload-btn" data-i18n="audio.stream.reloadBtn">🔄 Actualiser</button>
           </div>
         </div>
 
@@ -1069,17 +1048,17 @@
 
         <!-- Custom URL / URI Importer -->
         <form class="stream-custom-form" id="stream-custom-form">
-          <label class="mixer-section-label" for="stream-url-input" data-i18n="audio.stream.customLabel">Importer une playlist, un album ou un titre (Spotify, Apple Music, Deezer)</label>
+          <label class="mixer-section-label" for="stream-url-input" data-i18n="audio.stream.customLabel">Importer un lien Spotify, Apple Music ou Deezer</label>
           <div class="stream-input-row">
             <input
               type="text"
               id="stream-url-input"
-              placeholder="Collez un lien open.spotify.com, music.apple.com ou deezer.com..."
+              placeholder="Collez un lien playlist, album ou titre..."
               data-i18n-placeholder="audio.stream.inputPlaceholder"
             />
             <button type="submit" class="accent-btn" data-i18n="audio.stream.loadBtn">Charger</button>
           </div>
-          <p class="stream-url-error hidden" id="stream-url-error" data-i18n="audio.stream.invalidUrl">Lien non reconnu. Collez une URL publique Spotify, Apple Music ou Deezer (playlist, album ou titre).</p>
+          <p class="stream-url-error hidden" id="stream-url-error" data-i18n="audio.stream.invalidUrl">Lien non reconnu. Collez une URL publique Spotify, Apple Music ou Deezer.</p>
         </form>
 
         <!-- Embedded Official Streaming Player -->
@@ -1088,14 +1067,12 @@
             <span class="stream-active-title" id="stream-active-title">Spotify</span>
             <div class="stream-player-actions">
               <a class="ghost-sm-btn stream-ext-link" id="stream-open-ext" href="https://open.spotify.com" target="_blank" rel="noopener noreferrer">↗ Ouvrir sur Spotify</a>
-              <button type="button" class="ghost-sm-btn" id="stream-unload-btn" data-i18n="audio.stream.stopBtn">⏹ Décharger</button>
+              <button type="button" class="ghost-sm-btn" id="stream-unload-btn" data-i18n="audio.stream.stopBtn">⏹ Fermer</button>
             </div>
           </div>
           <div class="stream-iframe-mount" id="stream-iframe-mount"></div>
         </div>
       </div>
-
-      <p class="stream-layer-tip" data-i18n="audio.stream.layerTip">💡 Astuce : Superposez librement nos sons relaxants (pluie, cheminée, océan...) par-dessus votre musique Spotify, Apple Music, Deezer ou Radio !</p>
     </div>
   </aside>
 
@@ -1111,17 +1088,11 @@
     <button class="accent-btn" id="alarm-dismiss-btn" data-i18n="alarm.dismiss">Arrêter</button>
   </div>
 
-  <!-- Keyboard Shortcuts Hint & Copyright Footer -->
+  <!-- Footer -->
   <footer class="app-footer">
-    <div class="footer-shortcuts" data-i18n-html="footer.shortcutsHtml"><strong>CoolClock</strong> • Raccourcis : <kbd>1</kbd>-<kbd>6</kbd> Onglets • <kbd>Espace</kbd> Démarrer/Pause • <kbd>M</kbd> Sons & Musique • <kbd>P</kbd> Plein Écran • <kbd>T</kbd> Thème • <kbd>F</kbd> Concentration • <kbd>L</kbd> Langue</div>
+    <div class="footer-shortcuts" data-i18n-html="footer.shortcutsHtml">Raccourcis : <kbd>1</kbd>-<kbd>6</kbd> Onglets • <kbd>Espace</kbd> Lecture/Pause • <kbd>M</kbd> Audio • <kbd>P</kbd> Plein Écran • <kbd>T</kbd> Thème • <kbd>F</kbd> Focus • <kbd>L</kbd> Langue</div>
     <div class="footer-copyright-row">
-      <span class="footer-copy-main" data-i18n="footer.copyright">© 2026 CoolClock. Tous droits réservés.</span>
-      <span class="footer-copy-sep" aria-hidden="true">•</span>
-      <a href="mailto:coolclock@geek-factory.xyz" class="footer-ext-link">coolclock@geek-factory.xyz</a>
-      <span class="footer-copy-sep" aria-hidden="true">•</span>
-      <span class="footer-copy-tm" data-i18n="footer.trademarks">Spotify®, Apple Music® et Deezer™ sont des marques déposées de leurs propriétaires respectifs.</span>
-      <span class="footer-copy-sep" aria-hidden="true">•</span>
-      <span class="footer-copy-tm" data-i18n-html="footer.radioAttributionHtml">Radios en direct fournies à titre non commercial et sans publicité par <a href="https://somafm.com" target="_blank" rel="noopener noreferrer" class="footer-ext-link">SomaFM (somafm.com)</a>.</span>
+      <span class="footer-copy-main" data-i18n="footer.copyright">CoolClock, un projet GEEK FACTORY</span>
     </div>
   </footer>
 

@@ -2551,7 +2551,6 @@
     serviceBtns: document.querySelectorAll('#stream-service-tabs .stream-svc-btn'),
     embedSection: document.getElementById('stream-embed-section'),
     authBox: document.getElementById('stream-auth-box'),
-    fileWarn: document.getElementById('stream-file-warn'),
     popoutBtn: document.getElementById('stream-popout-btn'),
     nativeBtn: document.getElementById('stream-native-btn'),
     loginBtn: document.getElementById('stream-login-btn'),
@@ -2576,7 +2575,6 @@
     radioStationName: document.getElementById('stream-radio-station-name'),
     radioStationDesc: document.getElementById('stream-radio-station-desc'),
     radioStationLink: document.getElementById('stream-radio-station-link'),
-    radioDirectUrl: document.getElementById('stream-radio-direct-url'),
     radioCodecBtns: document.querySelectorAll('#stream-radio-codec-btns .radio-codec-btn'),
     radioPlayBtn: document.getElementById('stream-radio-play-btn'),
     radioLivePill: document.getElementById('stream-radio-live-pill'),
@@ -2599,11 +2597,6 @@
     radioPlaying: false,
     loginPollTimer: null,
   };
-
-  // Detect file:// local origin (where browsers isolate 3rd-party cookies inside iframes)
-  if (audioEl.fileWarn && window.location.protocol === 'file:') {
-    audioEl.fileWarn.classList.remove('hidden');
-  }
 
   function syncExpandBtnLabel() {
     if (!audioEl.expandBtn) return;
@@ -2983,7 +2976,6 @@
     if (!audioEl.radioStations) return;
     const activeSt = getActiveRadioObj();
     const codec = audioStudio.radioCodec === 'aac' ? 'aac' : 'mp3';
-    const codecUpper = codec.toUpperCase();
 
     audioEl.radioStations.innerHTML = '';
     LIVE_RADIOS.forEach((st) => {
@@ -3000,7 +2992,7 @@
       audioEl.radioStations.appendChild(btn);
     });
 
-    // Update Mandatory Attribution Card (Radio Name + Specific Station + Links to somafm.com & Direct Public URL)
+    // Update Mandatory Attribution Card (Radio Name + Specific Station + Link to somafm.com)
     if (audioEl.radioStationName) {
       audioEl.radioStationName.textContent = activeSt.stationName;
     }
@@ -3009,12 +3001,6 @@
     }
     if (audioEl.radioStationLink) {
       audioEl.radioStationLink.href = activeSt.stationPage;
-    }
-    if (audioEl.radioDirectUrl) {
-      const directUrl = getDirectSomaFmUrl(activeSt, codec, audioStudio.radioMirrorIdx);
-      audioEl.radioDirectUrl.href = directUrl;
-      audioEl.radioDirectUrl.textContent = t('audio.stream.radioDirectStream', { codec: codecUpper });
-      audioEl.radioDirectUrl.title = t('audio.stream.radioDirectStreamTitle', { codec: codecUpper });
     }
 
     if (audioEl.radioCodecBtns) {
@@ -3311,7 +3297,7 @@
   }
 
   /* ==========================================================================
-     9D. CONTACT FORM (FORMSPREE + HCAPTCHA + DIRECT EMAIL)
+     9D. CONTACT FORM & DIRECT EMAIL
      ========================================================================== */
   const CONTACT_EMAIL = 'coolclock@geek-factory.xyz';
 
@@ -3325,7 +3311,6 @@
     subjectIn: document.getElementById('contact-subject'),
     messageIn: document.getElementById('contact-message'),
     charCount: document.getElementById('contact-char-count'),
-    captchaFileHint: document.getElementById('contact-captcha-file-hint'),
     statusBox: document.getElementById('contact-form-status'),
     submitBtn: document.getElementById('contact-submit-btn'),
   };
@@ -3342,10 +3327,6 @@
   window.onCoolClockHCaptchaExpired = function () {
     contactCaptchaToken = '';
   };
-
-  if (contactEl.captchaFileHint && window.location.protocol === 'file:') {
-    contactEl.captchaFileHint.classList.remove('hidden');
-  }
 
   function showContactStatus(type, htmlOrText, isHtml = false, errKind = '') {
     if (!contactEl.statusBox) return;
@@ -3455,22 +3436,8 @@
       }
 
       const endpoint = (contactEl.form.getAttribute('action') || '').trim();
-      const isPlaceholderEndpoint =
-        !endpoint ||
-        endpoint.includes('VOTRE_ID_FORMSPREE') ||
-        endpoint.includes('YOUR_FORMSPREE_ID');
-
-      if (isPlaceholderEndpoint) {
-        const mailtoBody = `${messageVal}\n\n---\n${nameVal} (${emailVal})`;
-        const mailtoHref = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
-          formattedSubject
-        )}&body=${encodeURIComponent(mailtoBody)}`;
-        showContactStatus(
-          'info',
-          t('contact.info.placeholderEndpoint', { mailto: mailtoHref }),
-          true,
-          'placeholder'
-        );
+      if (!endpoint) {
+        showContactStatus('error', t('contact.err.network'), true, 'network');
         return;
       }
 

@@ -849,6 +849,27 @@ button {
   border-color: var(--border-strong);
 }
 
+.github-top-btn {
+  text-decoration: none;
+  border-color: var(--border-strong);
+}
+
+.github-top-btn svg {
+  color: var(--text-primary);
+  transition: color 0.2s, transform 0.2s;
+}
+
+.github-top-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-glow);
+  color: var(--accent);
+}
+
+.github-top-btn:hover svg {
+  color: var(--accent);
+  transform: scale(1.06);
+}
+
 .focus-trigger-btn {
   display: inline-flex;
   align-items: center;
@@ -2520,6 +2541,10 @@ button {
   gap: 0.45rem;
 }
 
+.footer-shortcuts {
+  line-height: 1.5;
+}
+
 .footer-copyright-row {
   display: flex;
   flex-wrap: wrap;
@@ -3785,24 +3810,6 @@ kbd {
   margin-top: 0.15rem;
 }
 
-.contact-highlights-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  padding: 0;
-  margin: 0;
-}
-
-.contact-highlights-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  font-size: 0.84rem;
-  line-height: 1.45;
-  color: var(--text-secondary);
-}
-
 .contact-form-card {
   padding: 1.75rem;
 }
@@ -3892,9 +3899,8 @@ kbd {
 
 .contact-captcha-section {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.85rem 1rem;
+  align-items: center;
+  padding: 0.75rem 0.9rem;
   border-radius: 14px;
   background: var(--bg-secondary);
   border: 1px solid var(--border);
@@ -3903,16 +3909,6 @@ kbd {
 .contact-captcha-section .h-captcha {
   min-height: 78px;
   overflow-x: auto;
-}
-
-.contact-captcha-file-hint {
-  font-size: 0.74rem;
-  line-height: 1.42;
-  color: #fbbf24;
-  padding: 0.45rem 0.65rem;
-  border-radius: 9px;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.35);
 }
 
 .contact-status {
@@ -3963,6 +3959,18 @@ kbd {
 /* ==========================================================================
    Responsive Design
    ========================================================================== */
+@media (max-width: 1320px) {
+  .topbar {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .main-nav {
+    order: 3;
+    margin: 0 auto;
+  }
+}
+
 @media (max-width: 920px) {
   .pomodoro-layout,
   .timers-layout,

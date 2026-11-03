@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="aurora-night">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoolClock — Horloges, Pomodoro, Minuteurs & Concentration</title>
+  <meta name="description" id="meta-description" content="CoolClock : horloge mondiale multi-fuseaux, minuteurs interactifs, Pomodoro, chronomètre de précision et mode concentration immersif." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Animated Ambient Background -->
+  <div class="ambient-bg" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Top Navigation Bar -->
+  <header class="topbar" id="topbar">
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 36 36" fill="none">
+          <circle cx="18" cy="18" r="15" stroke="currentColor" stroke-width="2.5" opacity="0.85"/>
+          <path d="M18 9.5V18L23.5 21.5" stroke="var(--accent)" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="18" cy="18" r="2.2" fill="var(--accent)"/>
+        </svg>
+      </div>
+      <div>
+        <span class="brand-name">CoolClock</span>
+        <span class="brand-badge" id="header-tz-badge">Local</span>
+      </div>
+    </div>
+
+    <nav class="main-nav" role="tablist" aria-label="Sections principales" data-i18n-aria="nav.aria">
+      <button class="nav-tab active" role="tab" aria-selected="true" data-tab="clock" title="Horloge & Fuseaux (1)" data-i18n-title="nav.clock.title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        <span data-i18n="nav.clock">Horloge</span>
+      </button>
+      <button class="nav-tab" role="tab" aria-selected="false" data-tab="pomodoro" title="Minuteur Pomodoro (2)" data-i18n-title="nav.pomodoro.title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6c-4.5 0-8 3.2-8 7.5S7.5 21 12 21s8-3.2 8-7.5S16.5 6 12 6z"/><path d="M12 6V3m-3 1c1.5-.8 4.5-.8 6 0"/></svg>
+        <span data-i18n="nav.pomodoro">Pomodoro</span>
+        <span class="nav-pill hidden" id="nav-pomo-pill">25:00</span>
+      </button>
+      <button class="nav-tab" role="tab" aria-selected="false" data-tab="timer" title="Minuteurs (3)" data-i18n-title="nav.timer.title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 2h4m-2 12V9"/><circle cx="12" cy="14" r="8"/></svg>
+        <span data-i18n="nav.timer">Minuteurs</span>
+        <span class="nav-pill hidden" id="nav-timer-pill">00:00</span>
+      </button>
+      <button class="nav-tab" role="tab" aria-selected="false" data-tab="stopwatch" title="Chronomètre (4)" data-i18n-title="nav.stopwatch.title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6M19 6l1.5-1.5"/></svg>
+        <span data-i18n="nav.stopwatch">Chronomètre</span>
+        <span class="nav-pill hidden" id="nav-sw-pill">00:00</span>
+      </button>
+      <button class="nav-tab" role="tab" aria-selected="false" data-tab="world" title="Horloges Mondiales (5)" data-i18n-title="nav.world.title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14.5 14.5 0 0 1 0 18M12 3a14.5 14.5 0 0 0 0 18"/></svg>
+        <span data-i18n="nav.world">Monde</span>
+      </button>
+    </nav>
+
+    <div class="topbar-actions">
+      <!-- Language Switcher (FR / EN) -->
+      <div class="lang-toggle" id="lang-toggle" role="group" aria-label="Sélecteur de langue" data-i18n-aria="lang.aria">
+        <button type="button" class="lang-btn active" data-lang="fr" title="Français (L)" data-i18n-title="lang.fr.title">FR</button>
+        <button type="button" class="lang-btn" data-lang="en" title="English (L)" data-i18n-title="lang.en.title">EN</button>
+      </div>
+
+      <!-- Relaxing Sounds & Music Streaming Studio Button -->
+      <button class="icon-btn audio-studio-trigger" id="audio-drawer-btn" aria-label="Studio Sons Relaxants et Musique en Streaming" data-i18n-aria="audio.drawer.aria" title="Studio Sons Relaxants & Streaming Musical (M)" data-i18n-title="audio.headerBtn.title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+        </svg>
+        <span class="btn-label" data-i18n="audio.headerBtn">Sons & Musique</span>
+        <span class="eq-bars hidden" id="header-audio-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+      </button>
+
+      <!-- Theme Picker Button -->
+      <div class="dropdown-wrap">
+        <button class="icon-btn" id="theme-menu-btn" aria-label="Changer de thème" data-i18n-aria="theme.btn.aria" title="Thèmes (T)" data-i18n-title="theme.btn.title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
+            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
+            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9z"/>
+          </svg>
+          <span class="btn-label" data-i18n="theme.btn">Thème</span>
+        </button>
+
+        <div class="theme-popover hidden" id="theme-popover" role="menu">
+          <div class="popover-header-row">
+            <div class="popover-title" data-i18n="theme.popover.title">24 Thèmes & Ambiances</div>
+            <button class="ghost-sm-btn" id="random-theme-btn" title="Choisir un thème au hasard" data-i18n-title="theme.random.title" data-i18n="theme.random">🎲 Aléatoire</button>
+          </div>
+          <input
+            type="search"
+            id="theme-search-input"
+            class="theme-search-input"
+            placeholder="Rechercher un thème (ex: Matrix, Sakura, Or...)"
+            data-i18n-placeholder="theme.search.placeholder"
+            aria-label="Rechercher un thème"
+            data-i18n-aria="theme.search.aria"
+          />
+          <div class="theme-cat-pills" id="theme-cat-pills">
+            <button class="cat-pill active" data-cat="all" data-i18n="theme.cat.all">Tous</button>
+            <button class="cat-pill" data-cat="dark" data-i18n="theme.cat.dark">Nuit</button>
+            <button class="cat-pill" data-cat="neon" data-i18n="theme.cat.neon">Néon & Rétro</button>
+            <button class="cat-pill" data-cat="nature" data-i18n="theme.cat.nature">Nature</button>
+            <button class="cat-pill" data-cat="light" data-i18n="theme.cat.light">Clair</button>
+          </div>
+          <div class="theme-grid" id="theme-grid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Focus Mode Toggle -->
+      <button class="focus-trigger-btn" id="focus-toggle-btn" title="Activer le Mode Concentration (F)" data-i18n-title="focus.trigger.title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+        </svg>
+        <span data-i18n="focus.trigger">Mode Concentration</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="main-container">
+    <!-- ==================== 1. MAIN CLOCK SECTION ==================== -->
+    <section class="tab-panel active" id="panel-clock" role="tabpanel">
+      <div class="clock-controls-bar">
+        <!-- Clock Style Switcher -->
+        <div class="segmented-control" id="clock-style-switch" aria-label="Style d'horloge" data-i18n-aria="clock.style.aria">
+          <button class="seg-btn active" data-style="digital" data-i18n="clock.style.digital">Numérique</button>
+          <button class="seg-btn" data-style="analog" data-i18n="clock.style.analog">Analogique</button>
+          <button class="seg-btn" data-style="flip" data-i18n="clock.style.flip">Flip Rétro</button>
+        </div>
+
+        <!-- Timezone Selector -->
+        <div class="tz-selector-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="tz-icon">
+            <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14.5 14.5 0 0 1 0 18M12 3a14.5 14.5 0 0 0 0 18"/>
+          </svg>
+          <select id="main-tz-select" aria-label="Sélectionner le fuseau horaire" data-i18n-aria="clock.tz.aria">
+            <!-- Populated dynamically -->
+          </select>
+          <button class="ghost-sm-btn" id="reset-local-tz-btn" title="Revenir au fuseau local" data-i18n-title="clock.tz.resetLocal.title" data-i18n="clock.tz.resetLocal">Local</button>
+        </div>
+
+        <!-- Display Options -->
+        <div class="toggle-chips">
+          <button class="chip-btn active" id="toggle-24h-btn" title="Basculer format 12h / 24h" data-i18n-title="clock.24h.title">24h</button>
+          <button class="chip-btn active" id="toggle-seconds-btn" title="Afficher / masquer les secondes" data-i18n-title="clock.seconds.title" data-i18n="clock.seconds">Secondes</button>
+          <button class="chip-btn fs-launch-chip" data-fs-launch="clock" title="Ouvrir l'horloge en plein écran (ou double-clic sur l'horloge)" data-i18n-title="clock.fsChip.title" data-i18n="common.fullscreenChip">⛶ Plein écran</button>
+        </div>
+      </div>
+
+      <!-- Centerpiece Clock Stage -->
+      <div class="clock-stage glass-card" id="main-clock-stage" title="Double-cliquez pour basculer en plein écran" data-i18n-title="clock.stage.title">
+        <div class="clock-location-line">
+          <span class="location-city" id="clock-city-label">Heure Locale</span>
+          <span class="location-offset" id="clock-offset-label">UTC+0</span>
+        </div>
+
+        <!-- Digital Clock View -->
+        <div class="clock-view" id="view-digital">
+          <div class="digital-readout">
+            <span id="dig-hours">00</span>
+            <span class="colon-blink">:</span>
+            <span id="dig-minutes">00</span>
+            <span class="seconds-group" id="dig-seconds-wrap">
+              <span class="colon-subtle">:</span><span id="dig-seconds">00</span>
+            </span>
+            <span class="ampm-badge hidden" id="dig-ampm">AM</span>
+          </div>
+          <div class="minute-progress-track" id="minute-progress-wrap" title="Progression de la minute" data-i18n-title="clock.minProgress.title">
+            <div class="minute-progress-bar" id="minute-progress-bar"></div>
+          </div>
+        </div>
+
+        <!-- Analog Clock View -->
+        <div class="clock-view hidden" id="view-analog">
+          <div class="analog-wrapper">
+            <svg class="analog-svg" id="analog-svg" viewBox="0 0 300 300" aria-label="Horloge analogique" data-i18n-aria="clock.analog.aria">
+              <defs>
+                <radialGradient id="dialGrad" cx="50%" cy="40%" r="60%">
+                  <stop offset="0%" stop-color="var(--surface-elevated)" />
+                  <stop offset="100%" stop-color="var(--surface)" />
+                </radialGradient>
+              </defs>
+              <circle cx="150" cy="150" r="140" fill="url(#dialGrad)" stroke="var(--border-strong)" stroke-width="3" />
+              <g id="analog-ticks"></g>
+              <g id="analog-numbers"></g>
+              <!-- Digital sub-dial inside analog -->
+              <text x="150" y="205" text-anchor="middle" class="analog-subtext" id="analog-sub-digital">00:00</text>
+              <!-- Hands -->
+              <line id="hand-hour" x1="150" y1="158" x2="150" y2="82" stroke="var(--text-primary)" stroke-width="6.5" stroke-linecap="round" />
+              <line id="hand-minute" x1="150" y1="164" x2="150" y2="52" stroke="var(--text-primary)" stroke-width="4.2" stroke-linecap="round" />
+              <line id="hand-second" x1="150" y1="175" x2="150" y2="38" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" />
+              <circle cx="150" cy="150" r="6.5" fill="var(--accent)" />
+              <circle cx="150" cy="150" r="2.8" fill="var(--bg)" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Flip Clock View -->
+        <div class="clock-view hidden" id="view-flip">
+          <div class="flip-clock-container">
+            <div class="flip-unit">
+              <div class="flip-card" id="flip-hours">
+                <span class="flip-value">00</span>
+              </div>
+              <span class="flip-unit-label" data-i18n="clock.flip.hours">Heures</span>
+            </div>
+            <div class="flip-separator">:</div>
+            <div class="flip-unit">
+              <div class="flip-card" id="flip-minutes">
+                <span class="flip-value">00</span>
+              </div>
+              <span class="flip-unit-label" data-i18n="clock.flip.minutes">Minutes</span>
+            </div>
+            <div class="flip-separator" id="flip-sec-sep">:</div>
+            <div class="flip-unit" id="flip-sec-unit">
+              <div class="flip-card flip-card-sec" id="flip-seconds">
+                <span class="flip-value">00</span>
+              </div>
+              <span class="flip-unit-label" data-i18n="clock.flip.seconds">Secondes</span>
+            </div>
+            <span class="ampm-badge flip-ampm hidden" id="flip-ampm">AM</span>
+          </div>
+        </div>
+
+        <!-- Date & Meta Footer -->
+        <div class="clock-date-footer">
+          <div class="date-full" id="clock-date-full">Lundi 2 novembre 2026</div>
+          <div class="date-meta">
+            <span id="clock-week-num">Semaine 45</span>
+            <span class="dot-sep">•</span>
+            <span class="clock-day-year" id="clock-day-year">Jour 306</span>
+            <span class="dot-sep">•</span>
+            <span id="clock-diff-local">Fuseau actuel</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini World Clocks Strip below main clock -->
+      <div class="mini-world-section">
+        <div class="section-header-inline">
+          <h2 data-i18n="clock.miniWorld.title">Aperçu des fuseaux favoris</h2>
+          <button class="text-link-btn" data-goto-tab="world" data-i18n="clock.miniWorld.manage">Gérer les horloges mondiales →</button>
+        </div>
+        <div class="mini-world-grid" id="mini-world-grid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 2. POMODORO SECTION ==================== -->
+    <section class="tab-panel" id="panel-pomodoro" role="tabpanel">
+      <div class="pomodoro-layout">
+        <!-- Left: Main Pomodoro Timer -->
+        <div class="glass-card pomo-main-card">
+          <div class="card-header-flex" style="margin-bottom:0.85rem;">
+            <div class="segmented-control pomo-modes" id="pomo-mode-tabs">
+              <button class="seg-btn active" data-pomo-mode="work" data-i18n="pomo.mode.work">Concentration</button>
+              <button class="seg-btn" data-pomo-mode="short" data-i18n="pomo.mode.short">Pause courte</button>
+              <button class="seg-btn" data-pomo-mode="long" data-i18n="pomo.mode.long">Pause longue</button>
+            </div>
+            <button class="ghost-sm-btn" data-fs-launch="pomodoro" title="Pomodoro en plein écran" data-i18n-title="pomo.fsBtn.title" data-i18n="common.fullscreenChip">⛶ Plein écran</button>
+          </div>
+
+          <div class="ring-timer-container">
+            <svg class="progress-ring" viewBox="0 0 260 260">
+              <circle class="ring-bg" cx="130" cy="130" r="114" />
+              <circle class="ring-fill" id="pomo-ring-fill" cx="130" cy="130" r="114" />
+            </svg>
+            <div class="ring-center-content">
+              <span class="pomo-phase-tag" id="pomo-phase-label">Session de focus</span>
+              <div class="pomo-time-display" id="pomo-time-display">25:00</div>
+              <div class="pomo-cycle-dots" id="pomo-cycle-dots" title="Cycles avant la pause longue" data-i18n-title="pomo.cycles.title"></div>
+            </div>
+          </div>
+
+          <div class="timer-action-row">
+            <button class="secondary-circle-btn" id="pomo-reset-btn" title="Réinitialiser la session" data-i18n-title="pomo.reset.title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            </button>
+            <button class="primary-pill-btn" id="pomo-start-btn">
+              <span id="pomo-start-label">Démarrer</span>
+            </button>
+            <button class="secondary-circle-btn" id="pomo-skip-btn" title="Passer à l'étape suivante" data-i18n-title="pomo.skip.title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+            </button>
+          </div>
+
+          <!-- Quick Settings Collapsible -->
+          <details class="pomo-settings-drawer">
+            <summary data-i18n="pomo.settings.summary">Personnaliser les durées & options</summary>
+            <div class="pomo-settings-grid">
+              <label>
+                <span data-i18n="pomo.settings.work">Focus (min)</span>
+                <input type="number" id="pomo-cfg-work" min="1" max="120" value="25" />
+              </label>
+              <label>
+                <span data-i18n="pomo.settings.short">Pause courte (min)</span>
+                <input type="number" id="pomo-cfg-short" min="1" max="60" value="5" />
+              </label>
+              <label>
+                <span data-i18n="pomo.settings.long">Pause longue (min)</span>
+                <input type="number" id="pomo-cfg-long" min="1" max="90" value="15" />
+              </label>
+              <label class="checkbox-row">
+                <input type="checkbox" id="pomo-cfg-auto" />
+                <span data-i18n="pomo.settings.auto">Enchaîner automatiquement les sessions</span>
+              </label>
+            </div>
+          </details>
+        </div>
+
+        <!-- Right: Tasks & Stats -->
+        <div class="pomo-side-col">
+          <div class="glass-card pomo-stats-card">
+            <h3 data-i18n="pomo.stats.title">Bilan d'aujourd'hui</h3>
+            <div class="stats-metrics">
+              <div class="metric-box">
+                <span class="metric-val" id="pomo-stat-sessions">0</span>
+                <span class="metric-lbl" data-i18n="pomo.stats.sessions">Pomodoros terminés</span>
+              </div>
+              <div class="metric-box">
+                <span class="metric-val" id="pomo-stat-minutes">0 min</span>
+                <span class="metric-lbl" data-i18n="pomo.stats.minutes">Temps concentré</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass-card pomo-tasks-card">
+            <div class="tasks-header">
+              <h3 data-i18n="pomo.tasks.title">Objectifs de concentration</h3>
+              <button class="ghost-sm-btn" id="pomo-clear-done-btn" data-i18n="pomo.tasks.clear">Nettoyer terminés</button>
+            </div>
+            <form class="task-add-form" id="pomo-task-form">
+              <input type="text" id="pomo-task-input" placeholder="Ajouter une tâche à accomplir..." data-i18n-placeholder="pomo.tasks.placeholder" maxlength="80" />
+              <button type="submit" class="accent-icon-btn" aria-label="Ajouter" data-i18n-aria="pomo.tasks.addAria">+</button>
+            </form>
+            <ul class="task-list" id="pomo-task-list">
+              <!-- Populated by JS -->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 3. TIMERS SECTION ==================== -->
+    <section class="tab-panel" id="panel-timer" role="tabpanel">
+      <div class="timers-layout">
+        <!-- Main Custom Countdown Card -->
+        <div class="glass-card timer-main-card">
+          <div class="card-header-flex">
+            <h2 data-i18n="timer.title">Minuteurs Interactifs</h2>
+            <div style="display:flex;gap:0.45rem;align-items:center;">
+              <select id="alarm-sound-select" class="compact-select" aria-label="Sonnerie d'alarme" data-i18n-aria="timer.sound.aria">
+                <option value="crystal" data-i18n="timer.sound.crystal">Sonnerie : Carillon Cristallin</option>
+                <option value="zen" data-i18n="timer.sound.zen">Sonnerie : Bol Tibétain</option>
+                <option value="digital" data-i18n="timer.sound.digital">Sonnerie : Bip Numérique</option>
+              </select>
+              <button class="ghost-sm-btn" data-fs-launch="timer" title="Minuteur interactif en plein écran" data-i18n-title="timer.fsBtn.title" data-i18n="common.fullscreenChip">⛶ Plein écran</button>
+            </div>
+          </div>
+
+          <!-- Interactive Timer Visual Switcher -->
+          <div class="visual-mode-bar" id="timer-visual-modes" role="tablist" aria-label="Type de minuteur interactif" data-i18n-aria="timer.vmodes.aria">
+            <button class="vmode-btn active" data-tmode="candle" title="Bougie et mèche interactive" data-i18n-title="timer.vmode.candle.title" data-i18n="timer.vmode.candle">🕯️ Bougie</button>
+            <button class="vmode-btn" data-tmode="fuse" title="Corde à mèche étincelante" data-i18n-title="timer.vmode.fuse.title" data-i18n="timer.vmode.fuse">🧨 Mèche</button>
+            <button class="vmode-btn" data-tmode="hourglass" title="Sablier renversable" data-i18n-title="timer.vmode.hourglass.title" data-i18n="timer.vmode.hourglass">⏳ Sablier</button>
+            <button class="vmode-btn" data-tmode="cup" title="Tasse fumante interactive" data-i18n-title="timer.vmode.cup.title" data-i18n="timer.vmode.cup">☕ Tasse</button>
+            <button class="vmode-btn" data-tmode="plant" title="Plante zen florissante" data-i18n-title="timer.vmode.plant.title" data-i18n="timer.vmode.plant">🌱 Plante</button>
+            <button class="vmode-btn" data-tmode="ring" title="Anneau classique" data-i18n-title="timer.vmode.ring.title" data-i18n="timer.vmode.ring">⭕ Anneau</button>
+          </div>
+
+          <!-- Preset Chips -->
+          <div class="preset-chips" id="timer-presets">
+            <button class="preset-chip" data-sec="60">1 min</button>
+            <button class="preset-chip" data-sec="180">3 min</button>
+            <button class="preset-chip" data-sec="300">5 min</button>
+            <button class="preset-chip" data-sec="600">10 min</button>
+            <button class="preset-chip" data-sec="900">15 min</button>
+            <button class="preset-chip" data-sec="1800">30 min</button>
+            <button class="preset-chip" data-sec="2700">45 min</button>
+            <button class="preset-chip" data-sec="3600">1 h</button>
+          </div>
+
+          <!-- Interactive / Ring Stage -->
+          <div class="timer-stage-wrapper" id="timer-stage-wrapper" data-visual="candle">
+            <div class="interactive-canvas-box" id="interactive-canvas-box">
+              <canvas id="interactive-timer-canvas" width="320" height="265" aria-label="Scène du minuteur interactif" data-i18n-aria="timer.canvas.aria"></canvas>
+              <p class="interactive-hint" id="interactive-hint-text">
+                🕯️ Cliquez sur la mèche pour allumer/souffler • Glissez la bougie pour régler la durée
+              </p>
+            </div>
+
+            <svg class="progress-ring timer-ring-svg hidden" id="timer-ring-svg" viewBox="0 0 260 260">
+              <circle class="ring-bg" cx="130" cy="130" r="114" />
+              <circle class="ring-fill" id="main-timer-ring" cx="130" cy="130" r="114" />
+            </svg>
+
+            <div class="timer-readout-dock" id="timer-readout-dock">
+              <!-- Editable inputs when stopped -->
+              <div class="hms-inputs" id="timer-hms-inputs">
+                <div class="hms-field">
+                  <input type="number" id="t-in-h" min="0" max="99" value="0" aria-label="Heures" data-i18n-aria="timer.in.hoursAria" />
+                  <span>h</span>
+                </div>
+                <span class="hms-sep">:</span>
+                <div class="hms-field">
+                  <input type="number" id="t-in-m" min="0" max="59" value="5" aria-label="Minutes" data-i18n-aria="timer.in.minutesAria" />
+                  <span>m</span>
+                </div>
+                <span class="hms-sep">:</span>
+                <div class="hms-field">
+                  <input type="number" id="t-in-s" min="0" max="59" value="0" aria-label="Secondes" data-i18n-aria="timer.in.secondsAria" />
+                  <span>s</span>
+                </div>
+              </div>
+              <!-- Countdown readout when active -->
+              <div class="pomo-time-display hidden" id="main-timer-readout">05:00</div>
+              <input type="text" class="timer-label-inline" id="main-timer-title" placeholder="Nom du minuteur (ex: Thé, Méditation...)" data-i18n-placeholder="timer.name.placeholder" maxlength="40" />
+            </div>
+          </div>
+
+          <div class="timer-action-row">
+            <button class="secondary-circle-btn" id="main-timer-reset" title="Réinitialiser" data-i18n-title="timer.reset.title">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            </button>
+            <button class="primary-pill-btn" id="main-timer-start">Démarrer</button>
+            <button class="ghost-sm-btn plus-one-btn" id="main-timer-plus1" title="Ajouter 1 minute" data-i18n-title="timer.plus1.title">+1 min</button>
+          </div>
+        </div>
+
+        <!-- Secondary Simultaneous Multi-Timers -->
+        <div class="glass-card multi-timers-card">
+          <div class="card-header-flex">
+            <h3 data-i18n="timer.multi.title">Minuteurs simultanés</h3>
+            <button class="ghost-sm-btn" id="test-sound-btn" title="Tester le son d'alarme" data-i18n-title="timer.multi.testSound.title" data-i18n="timer.multi.testSound">🔊 Tester le son</button>
+          </div>
+          <p class="muted-hint" data-i18n="timer.multi.hint">Lancez plusieurs comptes à rebours en parallèle (infusion, cuisson, rappels).</p>
+
+          <form class="multi-timer-form" id="multi-timer-form">
+            <input type="text" id="mt-name" placeholder="Étiquette (ex: Pâtes)" data-i18n-placeholder="timer.multi.namePlaceholder" maxlength="30" required />
+            <div class="mt-duration-inputs">
+              <input type="number" id="mt-min" min="0" max="999" value="8" aria-label="Minutes" data-i18n-aria="timer.in.minutesAria" />
+              <span>min</span>
+              <input type="number" id="mt-sec" min="0" max="59" value="0" aria-label="Secondes" data-i18n-aria="timer.in.secondsAria" />
+              <span>s</span>
+            </div>
+            <button type="submit" class="accent-btn" data-i18n="timer.multi.launch">+ Lancer</button>
+          </form>
+
+          <div class="multi-timers-list" id="multi-timers-list">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 4. STOPWATCH SECTION ==================== -->
+    <section class="tab-panel" id="panel-stopwatch" role="tabpanel">
+      <div class="stopwatch-layout">
+        <div class="glass-card sw-main-card">
+          <div class="card-header-flex" style="margin-bottom:0.5rem;">
+            <span class="section-eyebrow" data-i18n="sw.eyebrow">Chronomètre haute précision</span>
+            <button class="ghost-sm-btn" data-fs-launch="stopwatch" title="Chronomètre en plein écran" data-i18n-title="sw.fsBtn.title" data-i18n="common.fullscreenChip">⛶ Plein écran</button>
+          </div>
+          <div class="sw-display">
+            <span id="sw-main-time">00:00:00</span><span class="sw-centis" id="sw-centis">.00</span>
+          </div>
+          <div class="sw-sub-split" id="sw-current-lap">Tour actuel : 00:00.00</div>
+
+          <div class="timer-action-row">
+            <button class="secondary-pill-btn" id="sw-reset-btn" data-i18n="common.reset" disabled>Réinitialiser</button>
+            <button class="primary-pill-btn" id="sw-start-btn">Démarrer</button>
+            <button class="secondary-pill-btn" id="sw-lap-btn" data-i18n="sw.lap" disabled>Tour</button>
+          </div>
+        </div>
+
+        <div class="glass-card sw-laps-card">
+          <div class="card-header-flex">
+            <h3><span data-i18n="sw.laps.title">Historique des tours</span> <span class="count-badge" id="sw-lap-count">0</span></h3>
+            <button class="ghost-sm-btn" id="sw-copy-laps-btn" data-i18n="sw.laps.copy" disabled>Copier les tours</button>
+          </div>
+          <div class="laps-table-wrap">
+            <table class="laps-table">
+              <thead>
+                <tr>
+                  <th data-i18n="sw.laps.colLap">Tour</th>
+                  <th data-i18n="sw.laps.colSplit">Temps du tour</th>
+                  <th data-i18n="sw.laps.colTotal">Temps total</th>
+                </tr>
+              </thead>
+              <tbody id="sw-laps-body">
+                <tr class="empty-row">
+                  <td colspan="3" data-i18n="sw.laps.empty">Appuyez sur « Tour » pendant le chronométrage pour enregistrer vos temps intermédiaires.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 5. WORLD CLOCKS SECTION ==================== -->
+    <section class="tab-panel" id="panel-world" role="tabpanel">
+      <div class="glass-card world-header-card">
+        <div>
+          <h2 data-i18n="world.title">Horloges Mondiales & Fuseaux Horaires</h2>
+          <p class="muted-hint" data-i18n="world.hint">Comparez l'heure en direct à travers le monde avec indicateur jour/nuit.</p>
+        </div>
+        <div class="world-add-controls">
+          <select id="world-add-select" aria-label="Choisir un fuseau horaire à ajouter" data-i18n-aria="world.selectAria">
+            <!-- Populated dynamically -->
+          </select>
+          <button class="accent-btn" id="world-add-btn" data-i18n="world.addBtn">+ Ajouter la ville</button>
+          <button class="ghost-sm-btn" data-fs-launch="world" title="Mur mondial en plein écran" data-i18n-title="world.fsWallBtn.title" data-i18n="world.fsWallBtn">⛶ Mur Plein Écran</button>
+        </div>
+      </div>
+
+      <div class="world-cards-grid" id="world-cards-grid">
+        <!-- Populated dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== MULTI-MODE FULLSCREEN STUDIO ==================== -->
+  <aside class="fs-studio hidden" id="fullscreen-studio" aria-label="Modes Plein Écran" data-i18n-aria="fs.aria">
+    <!-- Auto-hiding Top HUD -->
+    <div class="fs-hud fs-hud-top" id="fs-hud-top">
+      <!-- Content Source Switcher -->
+      <div class="segmented-control fs-seg" id="fs-source-tabs" aria-label="Contenu affiché" data-i18n-aria="fs.src.aria">
+        <button class="seg-btn active" data-fs-src="clock" data-i18n="fs.src.clock">Horloge</button>
+        <button class="seg-btn" data-fs-src="pomodoro" data-i18n="fs.src.pomodoro">Pomodoro</button>
+        <button class="seg-btn" data-fs-src="timer" data-i18n="fs.src.timer">Minuteur</button>
+        <button class="seg-btn" data-fs-src="stopwatch" data-i18n="fs.src.stopwatch">Chrono</button>
+        <button class="seg-btn" data-fs-src="world" data-i18n="fs.src.world">Monde</button>
+      </div>
+
+      <!-- 6 Fullscreen Visual Modes -->
+      <div class="segmented-control fs-seg" id="fs-mode-tabs" aria-label="Style plein écran" data-i18n-aria="fs.mode.aria">
+        <button class="seg-btn active" data-fs-mode="giant" title="Affichage numérique monumental" data-i18n-title="fs.mode.giant.title" data-i18n="fs.mode.giant">🖥️ Géant</button>
+        <button class="seg-btn" data-fs-mode="flip-saver" title="Économiseur Flip Rétro style Fliqlo" data-i18n-title="fs.mode.flip.title" data-i18n="fs.mode.flip">🕰️ Flip</button>
+        <button class="seg-btn" data-fs-mode="cinema" title="Minuteur interactif grand format cinéma" data-i18n-title="fs.mode.cinema.title" data-i18n="fs.mode.cinema">🕯️ Interactif</button>
+        <button class="seg-btn" data-fs-mode="analog-lounge" title="Cadran analogique de salon" data-i18n-title="fs.mode.analog.title" data-i18n="fs.mode.analog">🧭 Analogique</button>
+        <button class="seg-btn" data-fs-mode="world-wall" title="Mur de contrôle multi-fuseaux" data-i18n-title="fs.mode.world.title" data-i18n="fs.mode.world">🌍 Mur Mondial</button>
+        <button class="seg-btn" data-fs-mode="oled" title="Noir pur OLED avec dérive anti-brûlure nocturne" data-i18n-title="fs.mode.oled.title" data-i18n="fs.mode.oled">🌑 Nuit OLED</button>
+      </div>
+    </div>
+
+    <!-- Dimmable Central Stage -->
+    <div class="fs-stage-body" id="fs-stage-body">
+      <!-- MODE 1: GIANT DIGITAL -->
+      <div class="fs-view" id="fs-view-giant">
+        <div class="fs-eyebrow" id="fs-giant-eyebrow">Heure Locale</div>
+        <div class="fs-giant-digits" id="fs-giant-digits">00:00:00</div>
+        <div class="fs-progress-line" id="fs-giant-progress-wrap">
+          <div class="fs-progress-fill" id="fs-giant-progress"></div>
+        </div>
+        <div class="fs-subline" id="fs-giant-subline">Lundi 2 novembre 2026</div>
+      </div>
+
+      <!-- MODE 2: FLIP SCREENSAVER (FLIQLO STYLE) -->
+      <div class="fs-view hidden" id="fs-view-flip">
+        <div class="fs-eyebrow" id="fs-flip-eyebrow">Flip Rétro</div>
+        <div class="fs-flip-row">
+          <div class="fs-flip-box" id="fs-flip-box-1"><span class="fs-flip-val">00</span></div>
+          <div class="fs-flip-box" id="fs-flip-box-2"><span class="fs-flip-val">00</span></div>
+          <div class="fs-flip-box fs-flip-box-sec" id="fs-flip-box-3"><span class="fs-flip-val">00</span></div>
+        </div>
+        <div class="fs-subline" id="fs-flip-subline"></div>
+      </div>
+
+      <!-- MODE 3: INTERACTIVE CINEMA (CANDLE / FUSE / HOURGLASS / CUP / PLANT) -->
+      <div class="fs-view hidden" id="fs-view-cinema">
+        <div class="fs-cinema-object-pills" id="fs-cinema-modes">
+          <button class="cat-pill active" data-fs-tmode="candle" data-i18n="timer.vmode.candle">🕯️ Bougie</button>
+          <button class="cat-pill" data-fs-tmode="fuse" data-i18n="timer.vmode.fuse">🧨 Mèche</button>
+          <button class="cat-pill" data-fs-tmode="hourglass" data-i18n="timer.vmode.hourglass">⏳ Sablier</button>
+          <button class="cat-pill" data-fs-tmode="cup" data-i18n="timer.vmode.cup">☕ Tasse</button>
+          <button class="cat-pill" data-fs-tmode="plant" data-i18n="timer.vmode.plant">🌱 Plante</button>
+        </div>
+        <canvas id="fs-interactive-canvas" width="460" height="380" aria-label="Minuteur interactif plein écran" data-i18n-aria="fs.cinema.canvasAria"></canvas>
+        <div class="fs-cinema-digits" id="fs-cinema-digits">05:00</div>
+        <div class="fs-subline" id="fs-cinema-hint"></div>
+      </div>
+
+      <!-- MODE 4: ANALOG LOUNGE -->
+      <div class="fs-view hidden" id="fs-view-analog">
+        <div class="fs-analog-layout">
+          <svg class="fs-analog-svg" viewBox="0 0 300 300" aria-label="Grande horloge analogique" data-i18n-aria="fs.analog.aria">
+            <circle cx="150" cy="150" r="142" fill="var(--surface)" stroke="var(--border-strong)" stroke-width="3" />
+            <g id="fs-analog-ticks"></g>
+            <g id="fs-analog-numbers"></g>
+            <line id="fs-hand-hour" x1="150" y1="158" x2="150" y2="80" stroke="var(--text-primary)" stroke-width="7" stroke-linecap="round" />
+            <line id="fs-hand-minute" x1="150" y1="164" x2="150" y2="50" stroke="var(--text-primary)" stroke-width="4.5" stroke-linecap="round" />
+            <line id="fs-hand-second" x1="150" y1="175" x2="150" y2="36" stroke="var(--accent)" stroke-width="2.2" stroke-linecap="round" />
+            <circle cx="150" cy="150" r="7" fill="var(--accent)" />
+          </svg>
+          <div class="fs-analog-meta">
+            <div class="fs-eyebrow" id="fs-analog-tz">Heure Locale</div>
+            <div class="fs-analog-digital" id="fs-analog-digital">00:00:00</div>
+            <div class="fs-subline" id="fs-analog-date">Lundi 2 novembre 2026</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODE 5: WORLD CONTROL WALL -->
+      <div class="fs-view hidden" id="fs-view-world">
+        <div class="fs-world-hero" id="fs-world-hero">
+          <span class="fs-eyebrow" id="fs-world-main-city" data-i18n="fs.world.mainCity">Fuseau Principal</span>
+          <div class="fs-world-main-time" id="fs-world-main-time">00:00:00</div>
+        </div>
+        <div class="fs-world-wall-grid" id="fs-world-wall-grid">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- MODE 6: OLED NIGHT DRIFT (ANTI-BURN-IN) -->
+      <div class="fs-view hidden" id="fs-view-oled">
+        <div class="fs-oled-floater" id="fs-oled-floater">
+          <div class="fs-oled-time" id="fs-oled-time">00:00</div>
+          <div class="fs-oled-sub" id="fs-oled-sub">Mode Nuit OLED</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auto-hiding Bottom HUD -->
+    <div class="fs-hud fs-hud-bottom glass-card" id="fs-hud-bottom">
+      <!-- Playback Controls (shown for Pomodoro / Timer / Stopwatch) -->
+      <div class="fs-playback-group hidden" id="fs-playback-group">
+        <button class="accent-btn" id="fs-play-btn">Démarrer</button>
+        <button class="ghost-sm-btn" id="fs-reset-btn" data-i18n="common.reset">Réinitialiser</button>
+        <button class="ghost-sm-btn hidden" id="fs-extra-btn">+1 min</button>
+      </div>
+
+      <!-- Brightness Dimmer (Nightstand / Ambient control) -->
+      <div class="fs-dimmer-group" title="Ajuster la luminosité de l'affichage (idéal la nuit)" data-i18n-title="fs.dimmer.title">
+        <span>🔅</span>
+        <input type="range" id="fs-brightness-range" min="15" max="100" value="100" aria-label="Luminosité plein écran" data-i18n-aria="fs.dimmer.aria" />
+        <span>🔆</span>
+      </div>
+
+      <!-- Quick Utility Buttons -->
+      <div class="fs-utility-btns">
+        <button class="ghost-sm-btn" id="fs-audio-btn" title="Ouvrir le mixeur sonore & Spotify / Apple Music / Deezer (M)" data-i18n-title="fs.audioBtn.title" data-i18n="fs.audioBtn">🎧 Sons & Musique</button>
+        <button class="ghost-sm-btn" id="fs-theme-cycle-btn" title="Changer de thème (T)" data-i18n-title="fs.themeBtn.title" data-i18n="fs.themeBtn">🎨 Thème</button>
+        <button class="ghost-sm-btn" id="fs-native-toggle-btn" title="Basculer le vrai plein écran du navigateur" data-i18n-title="fs.nativeBtn.title" data-i18n="fs.nativeBtn">🗖 Écran total</button>
+        <button class="focus-exit-btn" id="fs-close-btn" title="Quitter le plein écran (Échap / P)" data-i18n-title="fs.closeBtn.title" data-i18n="fs.closeBtn">✕ Quitter</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== IMMERSIVE FOCUS MODE OVERLAY ==================== -->
+  <aside class="focus-overlay hidden" id="focus-overlay" aria-label="Mode Concentration Immersif" data-i18n-aria="focus.aria">
+    <div class="focus-topbar">
+      <div class="segmented-control" id="focus-source-switch">
+        <button class="seg-btn active" data-focus-view="pomodoro" data-i18n="focus.src.pomodoro">Pomodoro</button>
+        <button class="seg-btn" data-focus-view="clock" data-i18n="focus.src.clock">Horloge Zen</button>
+        <button class="seg-btn" data-focus-view="timer" data-i18n="focus.src.timer">Minuteur</button>
+      </div>
+
+      <div class="focus-top-actions">
+        <button class="ghost-sm-btn" id="focus-fullscreen-btn" title="Basculer Plein Écran" data-i18n-title="focus.fsBtn.title" data-i18n="common.fullscreenChip">⛶ Plein écran</button>
+        <button class="focus-exit-btn" id="focus-close-btn" title="Quitter le mode concentration (Échap / F)" data-i18n-title="focus.closeBtn.title" data-i18n="focus.closeBtn">✕ Quitter</button>
+      </div>
+    </div>
+
+    <div class="focus-center">
+      <input
+        type="text"
+        class="focus-intention-input"
+        id="focus-intention-input"
+        placeholder="Quelle est votre priorité unique en ce moment ?"
+        data-i18n-placeholder="focus.intention.placeholder"
+        maxlength="90"
+      />
+
+      <div class="focus-giant-readout" id="focus-giant-readout">25:00</div>
+      <div class="focus-sub-status" id="focus-sub-status">Session de concentration</div>
+
+      <div class="focus-controls" id="focus-action-wrap">
+        <button class="primary-pill-btn focus-main-action" id="focus-primary-btn">Démarrer</button>
+        <button class="secondary-pill-btn" id="focus-reset-btn" data-i18n="common.reset">Réinitialiser</button>
+      </div>
+
+      <!-- Guided Breathing Pill -->
+      <div class="breathing-guide" id="breathing-guide">
+        <button class="chip-btn" id="toggle-breath-btn">🌿 Guide de cohérence cardiaque (Off)</button>
+        <div class="breath-visualizer hidden" id="breath-visualizer">
+          <div class="breath-circle"></div>
+          <span class="breath-text" id="breath-text">Inspirez...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ambient Soundscape Quick Mixer Dock -->
+    <div class="focus-sound-dock glass-card">
+      <div class="focus-dock-top-row">
+        <div class="sound-dock-label">
+          <span data-i18n="focus.sound.label">🎧 Mixeur rapide :</span>
+        </div>
+        <div class="focus-dock-actions">
+          <div class="volume-control">
+            <span aria-hidden="true">🔉</span>
+            <input type="range" id="ambient-volume" min="0" max="100" value="50" aria-label="Volume de l'ambiance" data-i18n-aria="focus.sound.volumeAria" />
+          </div>
+          <button class="ghost-sm-btn focus-open-studio-btn" id="focus-open-audio-btn" data-i18n="focus.sound.openStudio">🎵 Mixeur & Spotify / Apple / Deezer</button>
+        </div>
+      </div>
+      <div class="sound-buttons" id="ambient-sound-btns">
+        <button class="sound-chip active" data-sound="none" data-i18n="focus.sound.none">Silence</button>
+        <button class="sound-chip" data-sound="rain" data-i18n="focus.sound.rain">🌧️ Pluie vitre</button>
+        <button class="sound-chip" data-sound="thunder" data-i18n="focus.sound.thunder">⛈️ Orage</button>
+        <button class="sound-chip" data-sound="fire" data-i18n="focus.sound.fire">🔥 Cheminée</button>
+        <button class="sound-chip" data-sound="waves" data-i18n="focus.sound.waves">🌊 Océan</button>
+        <button class="sound-chip" data-sound="forest" data-i18n="focus.sound.forest">🌲 Forêt</button>
+        <button class="sound-chip" data-sound="stream" data-i18n="focus.sound.stream">💧 Ruisseau</button>
+        <button class="sound-chip" data-sound="night" data-i18n="focus.sound.night">🦗 Nuit d’été</button>
+        <button class="sound-chip" data-sound="cafe" data-i18n="focus.sound.cafe">☕ Café</button>
+        <button class="sound-chip" data-sound="train" data-i18n="focus.sound.train">🚂 Train</button>
+        <button class="sound-chip" data-sound="zen" data-i18n="focus.sound.zen">🥣 Bols Zen</button>
+        <button class="sound-chip" data-sound="pink" data-i18n="focus.sound.pink">🩷 Bruit rose</button>
+        <button class="sound-chip" data-sound="brown" data-i18n="focus.sound.brown">🪵 Bruit brun</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== PERSISTENT AUDIO & STREAMING STUDIO DRAWER ==================== -->
+  <div class="audio-drawer-backdrop" id="audio-drawer-backdrop"></div>
+  <aside class="audio-drawer" id="audio-studio-drawer" aria-label="Studio Sons Relaxants et Musique en Streaming" data-i18n-aria="audio.drawer.aria">
+    <div class="audio-drawer-header">
+      <div class="audio-drawer-title-group">
+        <h2 class="audio-drawer-title" data-i18n="audio.drawer.title">🎧 Studio Sons & Musique</h2>
+        <span class="audio-active-badge hidden" id="audio-active-badge">0</span>
+      </div>
+      <div class="audio-drawer-header-actions">
+        <button type="button" class="ghost-sm-btn" id="audio-drawer-expand" title="Agrandir ou réduire la largeur du lecteur musical" data-i18n-title="audio.drawer.expandTitle">⤢ Agrandir</button>
+        <button type="button" class="focus-exit-btn" id="audio-drawer-close" title="Fermer le panneau (la lecture continue)" data-i18n-title="audio.drawer.closeTitle">✕</button>
+      </div>
+    </div>
+
+    <div class="segmented-control audio-drawer-tabs" id="audio-studio-tabs">
+      <button type="button" class="seg-btn active" data-audio-tab="mixer" data-i18n="audio.tab.mixer">🌧️ Sons Relaxants (12)</button>
+      <button type="button" class="seg-btn" data-audio-tab="streaming" data-i18n="audio.tab.streaming">🎵 Spotify • Apple • Deezer</button>
+    </div>
+
+    <!-- Persistent SomaFM Attribution Strip when Radio is Actively Streaming -->
+    <div class="radio-nowplaying-strip hidden" id="audio-radio-nowplaying-bar">
+      <div class="radio-np-info">
+        <span class="radio-np-dot" aria-hidden="true"></span>
+        <span class="radio-np-text" id="audio-radio-np-text">SomaFM • Groove Salad</span>
+      </div>
+      <div class="radio-np-links">
+        <a href="https://somafm.com" target="_blank" rel="noopener noreferrer" class="radio-somafm-link">somafm.com ↗</a>
+        <button type="button" class="ghost-sm-btn radio-np-stop" id="audio-radio-np-stop" title="Mettre en pause">⏸</button>
+      </div>
+    </div>
+
+    <!-- TAB 1: 12-CHANNEL HI-FI RELAXING SOUNDSCAPE MIXER -->
+    <div class="audio-drawer-body" id="audio-panel-mixer">
+      <div class="mixer-master-bar">
+        <div class="mixer-master-vol">
+          <span class="mixer-master-label" data-i18n="audio.masterVol">Volume général des sons</span>
+          <div class="mixer-master-slider-row">
+            <span aria-hidden="true">🔉</span>
+            <input type="range" id="mixer-master-volume" min="0" max="100" value="50" aria-label="Volume de l'ambiance" data-i18n-aria="focus.sound.volumeAria" />
+            <span class="mixer-vol-pct" id="mixer-master-pct">50%</span>
+          </div>
+        </div>
+        <button type="button" class="ghost-sm-btn" id="mixer-stop-all-btn" data-i18n="audio.stopAll">✕ Tout couper</button>
+      </div>
+
+      <div class="mixer-presets-section">
+        <div class="mixer-section-label" data-i18n="audio.presets.title">Ambiances pré-mixées (1 clic)</div>
+        <div class="mixer-presets-row" id="mixer-presets">
+          <button type="button" class="cat-pill" data-preset="stormCabin" data-i18n="preset.stormCabin">⛈️ Chalet sous l’orage</button>
+          <button type="button" class="cat-pill" data-preset="forestRetreat" data-i18n="preset.forestRetreat">🌲 Retraite en forêt</button>
+          <button type="button" class="cat-pill" data-preset="starryBeach" data-i18n="preset.starryBeach">🌊 Plage étoilée</button>
+          <button type="button" class="cat-pill" data-preset="rainyCafe" data-i18n="preset.rainyCafe">☕ Café pluvieux</button>
+          <button type="button" class="cat-pill" data-preset="zenSanctuary" data-i18n="preset.zenSanctuary">🥣 Sanctuaire Zen</button>
+        </div>
+      </div>
+
+      <div class="mixer-grid" id="mixer-grid">
+        <!-- Populated dynamically with 12 stereo sound cards & individual sliders -->
+      </div>
+    </div>
+
+    <!-- TAB 2: APPLE MUSIC, SPOTIFY, DEEZER & SOMAFM RADIOS INTEGRATION -->
+    <div class="audio-drawer-body hidden" id="audio-panel-streaming">
+      <p class="stream-subtitle" data-i18n="audio.stream.subtitle">Écoutez vos playlists en entier ou les radios en direct SomaFM (sans publicité, usage non commercial).</p>
+
+      <!-- Service Brand Switcher -->
+      <div class="stream-service-tabs" id="stream-service-tabs" role="tablist">
+        <button type="button" class="stream-svc-btn active" data-service="spotify">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.42c-.18.3-.56.39-.86.21-2.35-1.44-5.31-1.76-8.8-.96-.34.08-.67-.13-.75-.47-.08-.34.13-.67.47-.75 3.82-.87 7.09-.5 9.73 1.11.3.18.39.56.21.86zm1.22-2.72c-.23.37-.71.49-1.08.26-2.69-1.65-6.79-2.13-9.97-1.17-.42.13-.86-.11-.99-.52-.13-.42.11-.86.52-.99 3.64-1.1 8.16-.57 11.26 1.34.37.23.49.71.26 1.08zm.11-2.83C14.7 8.96 9.38 8.78 6.3 9.71c-.49.15-1.01-.13-1.16-.62-.15-.49.13-1.01.62-1.16 3.53-1.07 9.41-.86 13.12 1.34.45.26.59.84.33 1.29-.26.44-.84.59-1.29.31z"/>
+          </svg>
+          <span>Spotify</span>
+        </button>
+
+        <button type="button" class="stream-svc-btn" data-service="apple">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M19 3v12.5a3.5 3.5 0 1 1-2-3.16V6.47l-8 1.78v9.25a3.5 3.5 0 1 1-2-3.16V6.8L19 4.13V3z"/>
+          </svg>
+          <span>Apple Music</span>
+        </button>
+
+        <button type="button" class="stream-svc-btn" data-service="deezer">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M18.8 6h3.7v2.1h-3.7V6zm0 3.1h3.7v2.1h-3.7V9.1zm-4.6 0h3.7v2.1h-3.7V9.1zm4.6 3.1h3.7v2.1h-3.7v-2.1zm-4.6 0h3.7v2.1h-3.7v-2.1zm-4.6 0h3.7v2.1H9.6v-2.1zm9.2 3.1h3.7v2.1h-3.7v-2.1zm-4.6 0h3.7v2.1h-3.7v-2.1zm-4.6 0h3.7v2.1H9.6v-2.1zm-4.6 0h3.7v2.1H5v-2.1zm-3.5 0h2.6v2.1H1.5v-2.1z"/>
+          </svg>
+          <span>Deezer</span>
+        </button>
+
+        <button type="button" class="stream-svc-btn" data-service="radio">
+          <span aria-hidden="true">📻</span>
+          <span data-i18n="audio.stream.radioTab">SomaFM</span>
+        </button>
+      </div>
+
+      <!-- SECTION A: SOMAFM LIVE RADIOS (NON-COMMERCIAL, ZERO ADS, DIRECT PUBLIC MP3/AAC SERVERS, CLEAR ATTRIBUTION) -->
+      <div class="stream-radio-box hidden" id="stream-radio-box">
+        <div class="stream-radio-header-row">
+          <div class="mixer-section-label" data-i18n="audio.stream.radioTitle">📻 Radios en direct — SomaFM</div>
+          <a href="https://somafm.com" target="_blank" rel="noopener noreferrer" class="radio-somafm-badge">somafm.com ↗</a>
+        </div>
+        <p class="stream-radio-sub" data-i18n-html="audio.stream.radioSubHtml">Diffusion directe non commerciale et sans aucune insertion publicitaire depuis les serveurs publics de <a href="https://somafm.com" target="_blank" rel="noopener noreferrer">somafm.com</a>.</p>
+
+        <!-- Station Selector Pills -->
+        <div class="stream-curated-list" id="stream-radio-stations">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Mandatory Station Attribution & Direct Public Stream Card -->
+        <div class="stream-radio-attr-card" id="stream-radio-attr-card">
+          <div class="radio-attr-main">
+            <div class="radio-attr-network">
+              <span class="radio-attr-label" data-i18n="audio.stream.radioNetworkLabel">Radio :</span>
+              <strong>SomaFM</strong>
+              <span class="radio-attr-sep" aria-hidden="true">•</span>
+              <a href="https://somafm.com" target="_blank" rel="noopener noreferrer" class="radio-somafm-link">somafm.com ↗</a>
+            </div>
+            <div class="radio-attr-station">
+              <span class="radio-attr-label" data-i18n="audio.stream.radioStationLabel">Station diffusée :</span>
+              <strong id="stream-radio-station-name">Groove Salad</strong>
+              <span class="radio-attr-genre" id="stream-radio-station-desc"></span>
+            </div>
+          </div>
+
+          <div class="radio-attr-links-row">
+            <div class="radio-codec-switch" id="stream-radio-codec-btns" role="group" aria-label="Format de flux public direct SomaFM">
+              <button type="button" class="radio-codec-btn active" data-codec="mp3">MP3 128k</button>
+              <button type="button" class="radio-codec-btn" data-codec="aac">AAC 128k</button>
+            </div>
+            <div class="radio-direct-links">
+              <a id="stream-radio-station-link" href="https://somafm.com/groovesalad/" target="_blank" rel="noopener noreferrer" class="ghost-sm-btn stream-ext-link" data-i18n="audio.stream.radioStationPage">↗ Page de la station</a>
+              <a id="stream-radio-direct-url" href="https://ice2.somafm.com/groovesalad-128-mp3" target="_blank" rel="noopener noreferrer" class="ghost-sm-btn stream-ext-link" title="URL publique directe vers les serveurs SomaFM (aucun proxy)">🔗 Flux direct</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="stream-radio-player-bar">
+          <button type="button" class="accent-btn" id="stream-radio-play-btn">▶ Écouter sur SomaFM</button>
+          <span class="stream-live-pill hidden" id="stream-radio-live-pill" data-i18n="audio.stream.radioLive">EN DIRECT • SOMAFM</span>
+          <div class="stream-radio-vol-wrap">
+            <span aria-hidden="true">🎵</span>
+            <input type="range" id="stream-radio-vol" min="0" max="100" value="70" aria-label="Volume de la musique" data-i18n-aria="audio.stream.radioVol" />
+          </div>
+        </div>
+
+        <p class="stream-radio-terms" data-i18n-html="audio.stream.radioTermsHtml">✓ Usage strictement non commercial (aucun paywall ni monétisation) • ✓ Zéro publicité ajoutée avant, pendant ou après le flux • ✓ Connexion directe aux flux publics MP3/AAC de <a href="https://somafm.com" target="_blank" rel="noopener noreferrer">somafm.com</a> (aucun relais ni serveur proxy).</p>
+        <audio id="stream-radio-audio" preload="none"></audio>
+      </div>
+
+      <!-- SECTION B: SPOTIFY / APPLE MUSIC / DEEZER EMBED + FULL-TRACK LOGIN & POP-OUT -->
+      <div class="stream-embed-section" id="stream-embed-section">
+        <!-- Full-Track Login & Anti-30s-Preview Box -->
+        <div class="stream-auth-box" id="stream-auth-box">
+          <div class="stream-auth-title" data-i18n="audio.stream.authTitle">🔓 Bloqué en mode « Extrait 30s » ? Débloquez les titres entiers :</div>
+          <p class="stream-auth-desc" data-i18n="audio.stream.authDesc">Par sécurité, Spotify, Apple Music et Deezer ne permettent pas de taper son mot de passe dans un mini-encadré isolé. Connectez-vous via le bouton ci-dessous ou ouvrez le Mini-lecteur flottant / l’application pour écouter vos titres à 100% :</p>
+          <p class="stream-file-warn hidden" id="stream-file-warn" data-i18n="audio.stream.fileProtocolWarn"></p>
+          <div class="stream-auth-actions">
+            <button type="button" class="accent-btn stream-auth-primary" id="stream-popout-btn" data-i18n="audio.stream.popoutBtn">🪟 Mini-lecteur complet (100% entier)</button>
+            <button type="button" class="ghost-sm-btn" id="stream-native-btn">📱 Ouvrir l’app Spotify</button>
+            <button type="button" class="ghost-sm-btn" id="stream-login-btn">🔑 1. Se connecter (Spotify)</button>
+            <button type="button" class="ghost-sm-btn" id="stream-reload-btn" data-i18n="audio.stream.reloadBtn">🔄 2. Actualiser l’encadré</button>
+          </div>
+        </div>
+
+        <!-- Curated Playlists Row -->
+        <div class="stream-curated-box">
+          <div class="mixer-section-label" id="stream-curated-title">Sélections Focus & Détente (Spotify)</div>
+          <div class="stream-curated-list" id="stream-curated-list">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Custom URL / URI Importer -->
+        <form class="stream-custom-form" id="stream-custom-form">
+          <label class="mixer-section-label" for="stream-url-input" data-i18n="audio.stream.customLabel">Importer une playlist, un album ou un titre (Spotify, Apple Music, Deezer)</label>
+          <div class="stream-input-row">
+            <input
+              type="text"
+              id="stream-url-input"
+              placeholder="Collez un lien open.spotify.com, music.apple.com ou deezer.com..."
+              data-i18n-placeholder="audio.stream.inputPlaceholder"
+            />
+            <button type="submit" class="accent-btn" data-i18n="audio.stream.loadBtn">Charger</button>
+          </div>
+          <p class="stream-url-error hidden" id="stream-url-error" data-i18n="audio.stream.invalidUrl">Lien non reconnu. Collez une URL publique Spotify, Apple Music ou Deezer (playlist, album ou titre).</p>
+        </form>
+
+        <!-- Embedded Official Streaming Player -->
+        <div class="stream-player-card" id="stream-player-card">
+          <div class="stream-player-topbar">
+            <span class="stream-active-title" id="stream-active-title">Spotify</span>
+            <div class="stream-player-actions">
+              <a class="ghost-sm-btn stream-ext-link" id="stream-open-ext" href="https://open.spotify.com" target="_blank" rel="noopener noreferrer">↗ Ouvrir sur Spotify</a>
+              <button type="button" class="ghost-sm-btn" id="stream-unload-btn" data-i18n="audio.stream.stopBtn">⏹ Décharger</button>
+            </div>
+          </div>
+          <div class="stream-iframe-mount" id="stream-iframe-mount"></div>
+        </div>
+      </div>
+
+      <p class="stream-layer-tip" data-i18n="audio.stream.layerTip">💡 Astuce : Superposez librement nos sons relaxants (pluie, cheminée, océan...) par-dessus votre musique Spotify, Apple Music, Deezer ou Radio !</p>
+    </div>
+  </aside>
+
+  <!-- Alarm Notification Banner -->
+  <div class="alarm-toast hidden" id="alarm-toast" role="alert">
+    <div class="alarm-toast-content">
+      <span class="alarm-bell">🔔</span>
+      <div>
+        <strong id="alarm-toast-title" data-i18n="alarm.timeUp">Temps écoulé !</strong>
+        <p id="alarm-toast-msg" data-i18n="alarm.defaultMsg">Votre minuteur est terminé.</p>
+      </div>
+    </div>
+    <button class="accent-btn" id="alarm-dismiss-btn" data-i18n="alarm.dismiss">Arrêter</button>
+  </div>
+
+  <!-- Keyboard Shortcuts Hint & Copyright Footer -->
+  <footer class="app-footer">
+    <div class="footer-shortcuts" data-i18n-html="footer.shortcutsHtml"><strong>CoolClock</strong> • Raccourcis : <kbd>1</kbd>-<kbd>5</kbd> Onglets • <kbd>Espace</kbd> Démarrer/Pause • <kbd>M</kbd> Sons & Musique • <kbd>P</kbd> Plein Écran • <kbd>T</kbd> Thème • <kbd>F</kbd> Concentration • <kbd>L</kbd> Langue</div>
+    <div class="footer-copyright-row">
+      <span class="footer-copy-main" data-i18n="footer.copyright">© 2026 CoolClock. Tous droits réservés.</span>
+      <span class="footer-copy-sep" aria-hidden="true">•</span>
+      <span class="footer-copy-tm" data-i18n="footer.trademarks">Spotify®, Apple Music® et Deezer™ sont des marques déposées de leurs propriétaires respectifs.</span>
+      <span class="footer-copy-sep" aria-hidden="true">•</span>
+      <span class="footer-copy-tm" data-i18n-html="footer.radioAttributionHtml">Radios en direct fournies à titre non commercial et sans publicité par <a href="https://somafm.com" target="_blank" rel="noopener noreferrer" class="footer-ext-link">SomaFM (somafm.com)</a>.</span>
+    </div>
+  </footer>
+
+  <script src="audio.js"></script>
+  <script src="interactive-timers.js"></script>
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

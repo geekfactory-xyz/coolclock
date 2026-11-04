@@ -767,18 +767,18 @@
         <div class="fs-subline" id="fs-flip-subline"></div>
       </div>
 
-      <!-- MODE 3: INTERACTIVE CINEMA (CANDLE / FUSE / HOURGLASS / CUP / PLANT) -->
+      <!-- MODE 3: INTERACTIVE CINEMA (MINIMALIST GIANT INTERACTIVE + MEDIUM DIGITAL) -->
       <div class="fs-view hidden" id="fs-view-cinema">
-        <div class="fs-cinema-object-pills" id="fs-cinema-modes">
-          <button class="cat-pill active" data-fs-tmode="candle" data-i18n="timer.vmode.candle">🕯️ Bougie</button>
-          <button class="cat-pill" data-fs-tmode="fuse" data-i18n="timer.vmode.fuse">🧨 Mèche</button>
-          <button class="cat-pill" data-fs-tmode="hourglass" data-i18n="timer.vmode.hourglass">⏳ Sablier</button>
-          <button class="cat-pill" data-fs-tmode="cup" data-i18n="timer.vmode.cup">☕ Tasse</button>
-          <button class="cat-pill" data-fs-tmode="plant" data-i18n="timer.vmode.plant">🌱 Plante</button>
-        </div>
-        <canvas id="fs-interactive-canvas" width="460" height="380" aria-label="Minuteur interactif plein écran" data-i18n-aria="fs.cinema.canvasAria"></canvas>
+        <button
+          type="button"
+          class="fs-cinema-close-btn"
+          id="fs-cinema-close-btn"
+          title="Quitter le plein écran (Échap / P)"
+          data-i18n-title="fs.closeBtn.title"
+          aria-label="Quitter"
+        >✕</button>
         <div class="fs-cinema-digits" id="fs-cinema-digits">05:00</div>
-        <div class="fs-subline" id="fs-cinema-hint"></div>
+        <canvas id="fs-interactive-canvas" width="960" height="795" aria-label="Minuteur interactif plein écran" data-i18n-aria="fs.cinema.canvasAria"></canvas>
       </div>
 
       <!-- MODE 4: ANALOG LOUNGE -->

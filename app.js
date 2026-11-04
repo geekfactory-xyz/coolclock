@@ -1836,10 +1836,9 @@
     flipSubline: document.getElementById('fs-flip-subline'),
 
     viewCinema: document.getElementById('fs-view-cinema'),
-    cinemaModeBtns: document.querySelectorAll('#fs-cinema-modes .cat-pill'),
+    cinemaCloseBtn: document.getElementById('fs-cinema-close-btn'),
     cinemaCanvas: document.getElementById('fs-interactive-canvas'),
     cinemaDigits: document.getElementById('fs-cinema-digits'),
-    cinemaHint: document.getElementById('fs-cinema-hint'),
 
     viewAnalog: document.getElementById('fs-view-analog'),
     analogTicks: document.getElementById('fs-analog-ticks'),
@@ -1876,6 +1875,7 @@
     source: 'clock', // 'clock' | 'pomodoro' | 'timer' | 'stopwatch' | 'world'
     mode: 'giant', // 'giant' | 'flip-saver' | 'cinema' | 'analog-lounge' | 'world-wall' | 'oled'
     cinemaObject: 'candle',
+    manualNativeToggle: false,
     idleTimer: null,
     prevFlip: { c1: '', c2: '', c3: '' },
     lastWorldRenderSec: -1,
@@ -1894,7 +1894,13 @@
     if (fs.idleTimer) clearTimeout(fs.idleTimer);
     fs.idleTimer = setTimeout(() => {
       if (!fs.open) return;
-      if (fsEl.hudTop.matches(':hover') || fsEl.hudBottom.matches(':hover')) return;
+      if (
+        fsEl.hudTop.matches(':hover') ||
+        fsEl.hudBottom.matches(':hover') ||
+        (fsEl.cinemaCloseBtn && fsEl.cinemaCloseBtn.matches(':hover'))
+      ) {
+        return;
+      }
       fsEl.studio.classList.add('fs-idle');
     }, 3200);
   }
@@ -1942,6 +1948,9 @@
   }
 
   function syncFsControlsUI() {
+    if (fs.mode === 'cinema' && state.timerVisualMode && state.timerVisualMode !== 'ring') {
+      fs.cinemaObject = state.timerVisualMode;
+    }
     fsEl.studio.setAttribute('data-fs-mode', fs.mode);
 
     fsEl.srcBtns.forEach((b) => {
@@ -1949,9 +1958,6 @@
     });
     fsEl.modeBtns.forEach((b) => {
       b.classList.toggle('active', b.dataset.fsMode === fs.mode);
-    });
-    fsEl.cinemaModeBtns.forEach((b) => {
-      b.classList.toggle('active', b.dataset.fsTmode === fs.cinemaObject);
     });
 
     fsEl.viewGiant.classList.toggle('hidden', fs.mode !== 'giant');
@@ -2126,7 +2132,6 @@
       fsEl.cinemaDigits.textContent = usingPomo
         ? formatDurationSec(pomo.remainingSec)
         : formatDurationSec(mainTimer.remainingSec);
-      fsEl.cinemaHint.textContent = getInteractiveHint(fs.cinemaObject);
     } else if (fs.mode === 'analog-lounge') {
       const tz = getEffectiveMainTz();
       const p = getTzParts(now, tz);
@@ -2178,7 +2183,7 @@
     }
   }
 
-  // Instantiate Cinema Fullscreen Interactive Canvas Engine (460x380 Retina)
+  // Instantiate Cinema Fullscreen Interactive Canvas Engine (960x795 Responsive Retina)
   if (window.InteractiveTimersEngine && fsEl.cinemaCanvas) {
     new window.InteractiveTimersEngine(
       fsEl.cinemaCanvas,
@@ -2257,7 +2262,7 @@
           }
         },
       },
-      { displayWidth: 460, displayHeight: 380 }
+      { displayWidth: 960, displayHeight: 795, responsive: true }
     );
   }
 
@@ -2269,6 +2274,9 @@
     btn.addEventListener('click', () => openFullscreenStudio(btn.dataset.fsLaunch));
   });
   fsEl.closeBtn.addEventListener('click', closeFullscreenStudio);
+  if (fsEl.cinemaCloseBtn) {
+    fsEl.cinemaCloseBtn.addEventListener('click', closeFullscreenStudio);
+  }
 
   ['mousemove', 'mousedown', 'touchstart', 'keydown'].forEach((evt) => {
     fsEl.studio.addEventListener(evt, wakeFsHud, { passive: true });
@@ -2295,14 +2303,6 @@
       }
       syncFsControlsUI();
       updateFullscreenStudioFrame();
-    });
-  });
-
-  fsEl.cinemaModeBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      fs.cinemaObject = btn.dataset.fsTmode;
-      applyTimerVisualMode(fs.cinemaObject);
-      syncFsControlsUI();
     });
   });
 
@@ -2338,7 +2338,22 @@
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
     } else {
-      document.exitFullscreen().catch(() => {});
+      fs.manualNativeToggle = true;
+      document.exitFullscreen().catch(() => {
+        fs.manualNativeToggle = false;
+      });
+    }
+  });
+
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) {
+      if (fs.manualNativeToggle) {
+        fs.manualNativeToggle = false;
+        return;
+      }
+      if (fs.open) {
+        closeFullscreenStudio();
+      }
     }
   });
 

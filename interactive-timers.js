@@ -13,6 +13,7 @@ class InteractiveTimersEngine {
     this.height = 265;
     this.displayWidth = options.displayWidth || 320;
     this.displayHeight = options.displayHeight || 265;
+    this.responsive = Boolean(options.responsive);
 
     // Pointer & interaction state
     this.pointer = { x: 160, y: 130, vx: 0, vy: 0, inside: false, down: false };
@@ -47,8 +48,10 @@ class InteractiveTimersEngine {
     const scaleY = this.displayHeight / this.height;
     this.canvas.width = Math.round(this.displayWidth * dpr);
     this.canvas.height = Math.round(this.displayHeight * dpr);
-    this.canvas.style.width = `${this.displayWidth}px`;
-    this.canvas.style.height = `${this.displayHeight}px`;
+    if (!this.responsive) {
+      this.canvas.style.width = `${this.displayWidth}px`;
+      this.canvas.style.height = `${this.displayHeight}px`;
+    }
     this.ctx.setTransform(dpr * scaleX, 0, 0, dpr * scaleY, 0, 0);
   }
 

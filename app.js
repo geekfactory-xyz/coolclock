@@ -318,6 +318,10 @@
 
   /* -------------------- DOM References -------------------- */
   const el = {
+    headerMenuWrap: document.getElementById('header-menu-wrap'),
+    headerMenuBtn: document.getElementById('header-menu-btn'),
+    headerMenuPopover: document.getElementById('header-menu-popover'),
+    headerMenuEq: document.getElementById('header-menu-eq'),
     langBtns: document.querySelectorAll('#lang-toggle .lang-btn'),
     metaDesc: document.getElementById('meta-description'),
     themeBtn: document.getElementById('theme-menu-btn'),
@@ -515,7 +519,8 @@
         <span class="theme-swatch" style="${swatchStyle}"></span>
         <span>${getThemeDisplayName(themeItem)}</span>
       `;
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         applyTheme(themeItem.id);
       });
       el.themeGrid.appendChild(btn);
@@ -545,14 +550,48 @@
     });
   });
 
+  function closeHeaderMenu() {
+    if (!el.headerMenuPopover || !el.headerMenuBtn) return;
+    el.headerMenuPopover.classList.add('hidden');
+    el.headerMenuBtn.classList.remove('open');
+    el.headerMenuBtn.setAttribute('aria-expanded', 'false');
+    if (el.themePopover) el.themePopover.classList.add('hidden');
+    if (el.themeBtn) {
+      el.themeBtn.classList.remove('active');
+      el.themeBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  function toggleHeaderMenu() {
+    if (!el.headerMenuPopover || !el.headerMenuBtn) return;
+    const willOpen = el.headerMenuPopover.classList.contains('hidden');
+    if (willOpen) {
+      el.headerMenuPopover.classList.remove('hidden');
+      el.headerMenuBtn.classList.add('open');
+      el.headerMenuBtn.setAttribute('aria-expanded', 'true');
+    } else {
+      closeHeaderMenu();
+    }
+  }
+
+  if (el.headerMenuBtn) {
+    el.headerMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleHeaderMenu();
+    });
+  }
+
   el.themeBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    el.themePopover.classList.toggle('hidden');
+    const isNowOpen = el.themePopover.classList.toggle('hidden') === false;
+    el.themeBtn.classList.toggle('active', isNowOpen);
+    el.themeBtn.setAttribute('aria-expanded', String(isNowOpen));
   });
 
   document.addEventListener('click', (e) => {
-    if (!el.themePopover.contains(e.target) && !el.themeBtn.contains(e.target)) {
-      el.themePopover.classList.add('hidden');
+    if (!e.target || !e.target.isConnected) return;
+    if (el.headerMenuWrap && !el.headerMenuWrap.contains(e.target)) {
+      closeHeaderMenu();
     }
   });
 
@@ -1674,7 +1713,10 @@
     }
   }
 
-  el.focusToggleBtn.addEventListener('click', () => toggleFocusMode(true));
+  el.focusToggleBtn.addEventListener('click', () => {
+    closeHeaderMenu();
+    toggleFocusMode(true);
+  });
   el.focusCloseBtn.addEventListener('click', () => toggleFocusMode(false));
 
   el.focusSourceBtns.forEach((btn) => {
@@ -2711,6 +2753,12 @@
     if (audioEl.headerEq) {
       audioEl.headerEq.classList.toggle('hidden', !anyPlaying);
     }
+    if (el.headerMenuBtn) {
+      el.headerMenuBtn.classList.toggle('playing', anyPlaying);
+    }
+    if (el.headerMenuEq) {
+      el.headerMenuEq.classList.toggle('hidden', !anyPlaying);
+    }
     if (audioEl.activeBadge) {
       if (count > 0) {
         audioEl.activeBadge.textContent = t('audio.activeBadge', { n: count });
@@ -3125,7 +3173,10 @@
 
   // Wire Audio Drawer Events
   if (audioEl.headerBtn) {
-    audioEl.headerBtn.addEventListener('click', () => toggleAudioDrawer());
+    audioEl.headerBtn.addEventListener('click', () => {
+      closeHeaderMenu();
+      toggleAudioDrawer();
+    });
   }
   if (audioEl.fsAudioBtn) {
     audioEl.fsAudioBtn.addEventListener('click', () => openAudioDrawer());
@@ -3494,13 +3545,23 @@
   document.addEventListener('keydown', (e) => {
     const tag = (e.target && e.target.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
-      if (e.key === 'Escape' && (audioStudio.open || focus.open || fs.open)) {
+      if (
+        e.key === 'Escape' &&
+        (audioStudio.open ||
+          focus.open ||
+          fs.open ||
+          (el.headerMenuPopover && !el.headerMenuPopover.classList.contains('hidden')))
+      ) {
         e.target.blur();
       }
       return;
     }
 
     if (e.key === 'Escape') {
+      if (el.headerMenuPopover && !el.headerMenuPopover.classList.contains('hidden')) {
+        closeHeaderMenu();
+        return;
+      }
       if (audioStudio.open) {
         closeAudioDrawer();
         return;

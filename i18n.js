@@ -25,7 +25,10 @@ window.COOLCLOCK_I18N = {
     'nav.contact': 'Contact',
     'nav.contact.title': 'Contact & Support (6)',
 
-    // Language & Theme & Focus Header Actions
+    // Header Menu & Actions
+    'header.menuBtn': 'Menu',
+    'header.menuTitle': 'Menu principal',
+    'header.menuLang': 'Langue',
     'lang.aria': 'Sélecteur de langue',
     'lang.fr.title': 'Français (L)',
     'lang.en.title': 'English (L)',
@@ -469,7 +472,10 @@ window.COOLCLOCK_I18N = {
     'nav.contact': 'Contact',
     'nav.contact.title': 'Contact & Support (6)',
 
-    // Language & Theme & Focus Header Actions
+    // Header Menu & Actions
+    'header.menuBtn': 'Menu',
+    'header.menuTitle': 'Main menu',
+    'header.menuLang': 'Language',
     'lang.aria': 'Language switcher',
     'lang.fr.title': 'Français (L)',
     'lang.en.title': 'English (L)',

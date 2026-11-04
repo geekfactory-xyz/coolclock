@@ -68,85 +68,122 @@
     </nav>
 
     <div class="topbar-actions">
-      <!-- Open-Source GitHub Repository Button -->
-      <a
-        href="https://github.com/geekfactory-xyz/coolclock"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="icon-btn github-top-btn"
-        title="Projet Open-Source — GitHub"
-        data-i18n-title="common.openSourceTitle"
-        aria-label="Projet Open-Source — GitHub"
-      >
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/>
-        </svg>
-        <span class="btn-label github-top-label" data-i18n="common.openSourceBtn">Projet Open-Source</span>
-      </a>
-
-      <!-- Language Switcher (FR / EN) -->
-      <div class="lang-toggle" id="lang-toggle" role="group" aria-label="Sélecteur de langue" data-i18n-aria="lang.aria">
-        <button type="button" class="lang-btn active" data-lang="fr" title="Français (L)" data-i18n-title="lang.fr.title">FR</button>
-        <button type="button" class="lang-btn" data-lang="en" title="English (L)" data-i18n-title="lang.en.title">EN</button>
-      </div>
-
-      <!-- Relaxing Sounds & Music Streaming Studio Button -->
-      <button class="icon-btn audio-studio-trigger" id="audio-drawer-btn" aria-label="Studio Sons Relaxants et Musique en Streaming" data-i18n-aria="audio.drawer.aria" title="Studio Sons Relaxants & Streaming Musical (M)" data-i18n-title="audio.headerBtn.title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
-          <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
-        </svg>
-        <span class="btn-label" data-i18n="audio.headerBtn">Sons & Musique</span>
-        <span class="eq-bars hidden" id="header-audio-eq" aria-hidden="true"><i></i><i></i><i></i></span>
-      </button>
-
-      <!-- Theme Picker Button -->
-      <div class="dropdown-wrap">
-        <button class="icon-btn" id="theme-menu-btn" aria-label="Changer de thème" data-i18n-aria="theme.btn.aria" title="Thèmes (T)" data-i18n-title="theme.btn.title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
-            <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
-            <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
-            <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
-            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9z"/>
+      <div class="header-menu-wrap" id="header-menu-wrap">
+        <!-- Main Hamburger Menu Button (3 Horizontal Bars) -->
+        <button
+          type="button"
+          class="icon-btn header-menu-btn"
+          id="header-menu-btn"
+          aria-expanded="false"
+          aria-haspopup="true"
+          aria-controls="header-menu-popover"
+          title="Menu principal"
+          data-i18n-title="header.menuTitle"
+        >
+          <svg class="hamburger-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="18" x2="20" y2="18" />
           </svg>
-          <span class="btn-label" data-i18n="theme.btn">Thème</span>
+          <span class="header-menu-label" data-i18n="header.menuBtn">Menu</span>
+          <span class="eq-bars hidden" id="header-menu-eq" aria-hidden="true"><i></i><i></i><i></i></span>
         </button>
 
-        <div class="theme-popover hidden" id="theme-popover" role="menu">
-          <div class="popover-header-row">
-            <div class="popover-title" data-i18n="theme.popover.title">24 Thèmes & Ambiances</div>
-            <button class="ghost-sm-btn" id="random-theme-btn" title="Choisir un thème au hasard" data-i18n-title="theme.random.title" data-i18n="theme.random">🎲 Aléatoire</button>
+        <!-- Dropdown Menu Containing Language, Sounds & Music, Theme, Focus Mode -->
+        <div class="header-menu-popover hidden" id="header-menu-popover" role="menu">
+          <!-- 1. Language Toggle (FR / EN) -->
+          <div class="header-menu-row">
+            <div class="header-menu-row-label">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14.5 14.5 0 0 1 0 18M12 3a14.5 14.5 0 0 0 0 18"/>
+              </svg>
+              <span data-i18n="header.menuLang">Langue</span>
+            </div>
+            <div class="lang-toggle" id="lang-toggle" role="group" aria-label="Sélecteur de langue" data-i18n-aria="lang.aria">
+              <button type="button" class="lang-btn active" data-lang="fr" title="Français (L)" data-i18n-title="lang.fr.title">FR</button>
+              <button type="button" class="lang-btn" data-lang="en" title="English (L)" data-i18n-title="lang.en.title">EN</button>
+            </div>
           </div>
-          <input
-            type="search"
-            id="theme-search-input"
-            class="theme-search-input"
-            placeholder="Rechercher un thème (ex: Matrix, Sakura, Or...)"
-            data-i18n-placeholder="theme.search.placeholder"
-            aria-label="Rechercher un thème"
-            data-i18n-aria="theme.search.aria"
-          />
-          <div class="theme-cat-pills" id="theme-cat-pills">
-            <button class="cat-pill active" data-cat="all" data-i18n="theme.cat.all">Tous</button>
-            <button class="cat-pill" data-cat="dark" data-i18n="theme.cat.dark">Nuit</button>
-            <button class="cat-pill" data-cat="neon" data-i18n="theme.cat.neon">Néon & Rétro</button>
-            <button class="cat-pill" data-cat="nature" data-i18n="theme.cat.nature">Nature</button>
-            <button class="cat-pill" data-cat="light" data-i18n="theme.cat.light">Clair</button>
+
+          <!-- 2. Sounds & Music Studio -->
+          <button
+            type="button"
+            class="header-menu-item audio-studio-trigger"
+            id="audio-drawer-btn"
+            aria-label="Studio Sons Relaxants et Musique en Streaming"
+            data-i18n-aria="audio.drawer.aria"
+            title="Studio Sons Relaxants & Streaming Musical (M)"
+            data-i18n-title="audio.headerBtn.title"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+              <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+            </svg>
+            <span data-i18n="audio.headerBtn">Sons & Musique</span>
+            <span class="eq-bars hidden menu-item-end" id="header-audio-eq" aria-hidden="true"><i></i><i></i><i></i></span>
+          </button>
+
+          <!-- 3. Theme Picker -->
+          <div class="header-menu-theme-group">
+            <button
+              type="button"
+              class="header-menu-item"
+              id="theme-menu-btn"
+              aria-expanded="false"
+              aria-label="Changer de thème"
+              data-i18n-aria="theme.btn.aria"
+              title="Thèmes (T)"
+              data-i18n-title="theme.btn.title"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
+                <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+                <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
+                <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+                <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9z"/>
+              </svg>
+              <span data-i18n="theme.btn">Thème</span>
+              <span class="menu-item-chevron menu-item-end" id="theme-menu-chevron" aria-hidden="true">▾</span>
+            </button>
+
+            <div class="theme-popover hidden" id="theme-popover" role="region">
+              <div class="popover-header-row">
+                <div class="popover-title" data-i18n="theme.popover.title">24 Thèmes & Ambiances</div>
+                <button type="button" class="ghost-sm-btn" id="random-theme-btn" title="Choisir un thème au hasard" data-i18n-title="theme.random.title" data-i18n="theme.random">🎲 Aléatoire</button>
+              </div>
+              <input
+                type="search"
+                id="theme-search-input"
+                class="theme-search-input"
+                placeholder="Rechercher un thème (ex: Matrix, Sakura, Or...)"
+                data-i18n-placeholder="theme.search.placeholder"
+                aria-label="Rechercher un thème"
+                data-i18n-aria="theme.search.aria"
+              />
+              <div class="theme-cat-pills" id="theme-cat-pills">
+                <button type="button" class="cat-pill active" data-cat="all" data-i18n="theme.cat.all">Tous</button>
+                <button type="button" class="cat-pill" data-cat="dark" data-i18n="theme.cat.dark">Nuit</button>
+                <button type="button" class="cat-pill" data-cat="neon" data-i18n="theme.cat.neon">Néon & Rétro</button>
+                <button type="button" class="cat-pill" data-cat="nature" data-i18n="theme.cat.nature">Nature</button>
+                <button type="button" class="cat-pill" data-cat="light" data-i18n="theme.cat.light">Clair</button>
+              </div>
+              <div class="theme-grid" id="theme-grid">
+                <!-- Populated by JS -->
+              </div>
+            </div>
           </div>
-          <div class="theme-grid" id="theme-grid">
-            <!-- Populated by JS -->
-          </div>
+
+          <div class="header-menu-divider" aria-hidden="true"></div>
+
+          <!-- 4. Focus Mode Toggle -->
+          <button type="button" class="focus-trigger-btn header-menu-focus-btn" id="focus-toggle-btn" title="Activer le Mode Concentration (F)" data-i18n-title="focus.trigger.title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
+            </svg>
+            <span data-i18n="focus.trigger">Mode Concentration</span>
+          </button>
         </div>
       </div>
-
-      <!-- Focus Mode Toggle -->
-      <button class="focus-trigger-btn" id="focus-toggle-btn" title="Activer le Mode Concentration (F)" data-i18n-title="focus.trigger.title">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/>
-        </svg>
-        <span data-i18n="focus.trigger">Mode Concentration</span>
-      </button>
     </div>
   </header>
 
@@ -1090,10 +1127,26 @@
 
   <!-- Footer -->
   <footer class="app-footer">
-    <div class="footer-shortcuts" data-i18n-html="footer.shortcutsHtml">Raccourcis : <kbd>1</kbd>-<kbd>6</kbd> Onglets • <kbd>Espace</kbd> Lecture/Pause • <kbd>M</kbd> Audio • <kbd>P</kbd> Plein Écran • <kbd>T</kbd> Thème • <kbd>F</kbd> Focus • <kbd>L</kbd> Langue</div>
-    <div class="footer-copyright-row">
-      <span class="footer-copy-main" data-i18n="footer.copyright">CoolClock, un projet GEEK FACTORY</span>
+    <div class="footer-center">
+      <div class="footer-shortcuts" data-i18n-html="footer.shortcutsHtml">Raccourcis : <kbd>1</kbd>-<kbd>6</kbd> Onglets • <kbd>Espace</kbd> Lecture/Pause • <kbd>M</kbd> Audio • <kbd>P</kbd> Plein Écran • <kbd>T</kbd> Thème • <kbd>F</kbd> Focus • <kbd>L</kbd> Langue</div>
+      <div class="footer-copyright-row">
+        <span class="footer-copy-main" data-i18n="footer.copyright">CoolClock, un projet GEEK FACTORY</span>
+      </div>
     </div>
+
+    <a
+      href="https://github.com/geekfactory-xyz/coolclock"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="footer-oss-btn"
+      title="Projet Open-Source sur GitHub"
+      data-i18n-title="common.openSourceTitle"
+    >
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/>
+      </svg>
+      <span data-i18n="common.openSourceBtn">Projet Open-Source</span>
+    </a>
   </footer>
 
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>

@@ -8,6 +8,56 @@
   const STORAGE_KEY = 'coolclock_state_v1';
   const RING_CIRCUMFERENCE = 2 * Math.PI * 114; // r = 114 => ~716.28
 
+  /* -------------------- SMART Board / Touch Panel Detection -------------------- */
+  const isSmartOrTouchPanel =
+    /Android|SMART|CrOS/i.test(navigator.userAgent || '') ||
+    Boolean(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  document.documentElement.classList.toggle('smart-touch-panel', isSmartOrTouchPanel);
+
+  function syncViewportHeight() {
+    const h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    if (h) document.documentElement.style.setProperty('--app-height', `${Math.round(h)}px`);
+  }
+  syncViewportHeight();
+  window.addEventListener('resize', syncViewportHeight);
+  window.addEventListener('orientationchange', () => setTimeout(syncViewportHeight, 250));
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', syncViewportHeight);
+  document.addEventListener('fullscreenchange', () => setTimeout(syncViewportHeight, 120));
+  document.addEventListener('webkitfullscreenchange', () => setTimeout(syncViewportHeight, 120));
+
+  /* -------------------- Cross-browser Fullscreen Helpers -------------------- */
+  function getFullscreenElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  }
+
+  function requestNativeFullscreen(target) {
+    const node = target || document.documentElement;
+    try {
+      const fn = node.requestFullscreen || node.webkitRequestFullscreen;
+      if (!fn) return;
+      const res = fn.call(node);
+      if (res && typeof res.catch === 'function') res.catch(() => {});
+    } catch (_) {
+      /* Fullscreen refused (kiosk / WebView): in-page overlay still works */
+    }
+  }
+
+  function exitNativeFullscreen() {
+    if (!getFullscreenElement()) return;
+    try {
+      const fn = document.exitFullscreen || document.webkitExitFullscreen;
+      if (!fn) return;
+      const res = fn.call(document);
+      if (res && typeof res.catch === 'function') res.catch(() => {});
+    } catch (_) {
+      /* noop */
+    }
+  }
+
+  function setText(node, text) {
+    if (node && node.textContent !== text) node.textContent = text;
+  }
+
   const THEMES = [
     // Nuit & Espace (dark)
     { id: 'aurora-night', name: 'Nuit Boréale', bg: '#080d1a', color: '#38bdf8', cat: 'dark' },
@@ -122,7 +172,7 @@
     if (typeof str !== 'string') return key;
     if (vars) {
       Object.entries(vars).forEach(([k, v]) => {
-        str = str.replaceAll(`{${k}}`, String(v));
+        str = str.split(`{${k}}`).join(String(v));
       });
     }
     return str;
@@ -146,13 +196,17 @@
     return val === key ? '' : val;
   }
 
+  function cloneDefaultState() {
+    return JSON.parse(JSON.stringify(defaultState));
+  }
+
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return structuredClone(defaultState);
+      if (!raw) return cloneDefaultState();
       const parsed = JSON.parse(raw);
       const merged = {
-        ...structuredClone(defaultState),
+        ...cloneDefaultState(),
         ...parsed,
         pomoConfig: { ...defaultState.pomoConfig, ...(parsed.pomoConfig || {}) },
         pomoStats: { ...defaultState.pomoStats, ...(parsed.pomoStats || {}) },
@@ -167,7 +221,7 @@
       }
       return merged;
     } catch (_) {
-      return structuredClone(defaultState);
+      return cloneDefaultState();
     }
   }
 
@@ -198,31 +252,32 @@
     return parts[parts.length - 1].replace(/_/g, ' ');
   }
 
-  function getTzParts(date, timeZone) {
+  const tzPartsCache = {};
+
+  function getTzFormatter(timeZone) {
+    const key = timeZone || 'UTC';
+    if (tzPartsCache[key]) return tzPartsCache[key];
+    const opts = {
+      hour12: false,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    };
     let dtf;
     try {
-      dtf = new Intl.DateTimeFormat('en-US', {
-        timeZone: timeZone || 'UTC',
-        hour12: false,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      });
+      dtf = new Intl.DateTimeFormat('en-US', { ...opts, timeZone: key });
     } catch (_) {
-      dtf = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'UTC',
-        hour12: false,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      });
+      dtf = new Intl.DateTimeFormat('en-US', { ...opts, timeZone: 'UTC' });
     }
+    tzPartsCache[key] = dtf;
+    return dtf;
+  }
+
+  function getTzParts(date, timeZone) {
+    const dtf = getTzFormatter(timeZone);
     const parts = {};
     dtf.formatToParts(date).forEach(({ type, value }) => {
       parts[type] = value;
@@ -782,11 +837,53 @@
     }
   }
 
+  const dateFullCache = {};
+  const dateShortCache = {};
+  let lastClockTextKey = '';
+
+  function getDateFullFormatter(tz) {
+    const key = `${getLocale()}|${tz}`;
+    if (!dateFullCache[key]) {
+      dateFullCache[key] = new Intl.DateTimeFormat(getLocale(), {
+        timeZone: tz,
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+    }
+    return dateFullCache[key];
+  }
+
+  function getDateShortFormatter(tz) {
+    const key = `${getLocale()}|${tz}`;
+    if (!dateShortCache[key]) {
+      dateShortCache[key] = new Intl.DateTimeFormat(getLocale(), {
+        timeZone: tz,
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+      });
+    }
+    return dateShortCache[key];
+  }
+
   function updateClockFrame() {
     const now = new Date();
     const tz = getEffectiveMainTz();
     const parts = getTzParts(now, tz);
     const ms = now.getMilliseconds();
+
+    // Smooth sub-second elements (every frame)
+    const progressPct = ((parts.second + ms / 1000) / 60) * 100;
+    el.minuteProgressBar.style.width = `${progressPct.toFixed(2)}%`;
+    const secAngle = (parts.second + ms / 1000) * 6;
+    el.handSecond.setAttribute('transform', `rotate(${secAngle.toFixed(2)} 150 150)`);
+
+    // Text & metadata: once per second (or when settings change) — light on ARM CPUs
+    const textKey = `${tz}|${state.selectedTz}|${state.use24h}|${state.showSeconds}|${getLang()}|${parts.hour}:${parts.minute}:${parts.second}`;
+    if (textKey === lastClockTextKey) return;
+    lastClockTextKey = textKey;
 
     let displayHour = parts.hour;
     let ampm = 'AM';
@@ -802,61 +899,52 @@
     // Header badge
     const offsetMins = getUtcOffsetMinutes(now, tz);
     const offsetStr = formatUtcOffset(offsetMins);
-    el.headerTzBadge.textContent = `${formatTzCity(tz)} (${offsetStr})`;
+    setText(el.headerTzBadge, `${formatTzCity(tz)} (${offsetStr})`);
 
     // Location & Offset
-    el.clockCityLabel.textContent = getFriendlyTzLabel(state.selectedTz);
-    el.clockOffsetLabel.textContent = offsetStr;
+    setText(el.clockCityLabel, getFriendlyTzLabel(state.selectedTz));
+    setText(el.clockOffsetLabel, offsetStr);
 
     // Digital readout
-    el.digHours.textContent = hStr;
-    el.digMinutes.textContent = mStr;
-    el.digSeconds.textContent = sStr;
-    el.digAmpm.textContent = ampm;
+    setText(el.digHours, hStr);
+    setText(el.digMinutes, mStr);
+    setText(el.digSeconds, sStr);
+    setText(el.digAmpm, ampm);
     el.digAmpm.classList.toggle('hidden', state.use24h);
 
-    const progressPct = ((parts.second + ms / 1000) / 60) * 100;
-    el.minuteProgressBar.style.width = `${progressPct.toFixed(2)}%`;
-
-    // Analog hands (smooth sweep)
-    const secAngle = (parts.second + ms / 1000) * 6;
+    // Analog hands
     const minAngle = (parts.minute + parts.second / 60) * 6;
     const hourAngle = ((parts.hour % 12) + parts.minute / 60) * 30;
     el.handHour.setAttribute('transform', `rotate(${hourAngle.toFixed(2)} 150 150)`);
     el.handMinute.setAttribute('transform', `rotate(${minAngle.toFixed(2)} 150 150)`);
-    el.handSecond.setAttribute('transform', `rotate(${secAngle.toFixed(2)} 150 150)`);
-    el.analogSubDigital.textContent = state.use24h ? `${hStr}:${mStr}` : `${hStr}:${mStr} ${ampm}`;
+    setText(el.analogSubDigital, state.use24h ? `${hStr}:${mStr}` : `${hStr}:${mStr} ${ampm}`);
 
     // Flip clock
     updateFlipUnit(el.flipHours, hStr, 'h');
     updateFlipUnit(el.flipMinutes, mStr, 'm');
     updateFlipUnit(el.flipSeconds, sStr, 's');
-    el.flipAmpm.textContent = ampm;
+    setText(el.flipAmpm, ampm);
     el.flipAmpm.classList.toggle('hidden', state.use24h);
 
     // Date metadata
     try {
-      const dateFormatter = new Intl.DateTimeFormat(getLocale(), {
-        timeZone: tz,
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      });
-      el.clockDateFull.textContent = dateFormatter.format(now);
+      setText(el.clockDateFull, getDateFullFormatter(tz).format(now));
     } catch (_) {
-      el.clockDateFull.textContent = now.toLocaleDateString(getLocale(), {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      });
+      setText(
+        el.clockDateFull,
+        now.toLocaleDateString(getLocale(), {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })
+      );
     }
 
     const { weekNo, dayOfYear } = getWeekAndDayOfYear(parts.year, parts.month, parts.day);
-    el.clockWeekNum.textContent = t('clock.week', { n: weekNo });
-    el.clockDayYear.textContent = t('clock.day', { n: dayOfYear });
-    el.clockDiffLocal.textContent = formatDiffFromLocal(now, tz);
+    setText(el.clockWeekNum, t('clock.week', { n: weekNo }));
+    setText(el.clockDayYear, t('clock.day', { n: dayOfYear }));
+    setText(el.clockDiffLocal, formatDiffFromLocal(now, tz));
   }
 
   /* ==========================================================================
@@ -960,12 +1048,7 @@
       const timeText = `${pad2(dispH)}:${pad2(p.minute)}${state.showSeconds ? ':' + pad2(p.second) : ''}${suffix}`;
       const offsetStr = formatUtcOffset(getUtcOffsetMinutes(now, tz));
       const regionEl = card.querySelector('.wc-region');
-      const shortDate = new Intl.DateTimeFormat(getLocale(), {
-        timeZone: tz,
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-      }).format(now);
+      const shortDate = getDateShortFormatter(tz).format(now);
 
       card.querySelector('.wc-sky').textContent = skyIcon;
       regionEl.textContent = `${regionEl.dataset.full} • ${offsetStr}`;
@@ -1668,11 +1751,19 @@
   function toggleFocusMode(forceState) {
     focus.open = typeof forceState === 'boolean' ? forceState : !focus.open;
     el.focusOverlay.classList.toggle('hidden', !focus.open);
+    document.documentElement.classList.toggle(
+      'overlay-lock',
+      Boolean(focus.open || (typeof fs !== 'undefined' && fs.open))
+    );
     if (!focus.open) {
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => {});
-      }
+      exitNativeFullscreen();
     } else {
+      try {
+        window.scrollTo(0, 0);
+      } catch (_) {
+        /* noop */
+      }
+      syncViewportHeight();
       updateFocusReadout();
     }
   }
@@ -1736,10 +1827,10 @@
   });
 
   el.focusFullscreenBtn.addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
+    if (!getFullscreenElement()) {
+      requestNativeFullscreen(document.documentElement);
     } else {
-      document.exitFullscreen().catch(() => {});
+      exitNativeFullscreen();
     }
   });
 
@@ -1880,7 +1971,15 @@
     prevFlip: { c1: '', c2: '', c3: '' },
     lastWorldRenderSec: -1,
     lastOledDriftSec: -1,
+    enteredNativeAt: 0,
+    lastWakeAt: 0,
   };
+
+  let fsCinemaEngine = null;
+
+  function syncOverlayLock() {
+    document.documentElement.classList.toggle('overlay-lock', Boolean(fs.open || focus.open));
+  }
 
   function buildFsAnalogDial() {
     if (!fsEl.analogTicks || !el.analogTicks) return;
@@ -1888,16 +1987,24 @@
     fsEl.analogNumbers.innerHTML = el.analogNumbers.innerHTML;
   }
 
-  function wakeFsHud() {
+  function wakeFsHud(e) {
     if (!fs.open || !fsEl.studio) return;
+    // Throttle high-frequency move events (pen/mouse) — cheap on ARM CPUs
+    if (e && (e.type === 'mousemove' || e.type === 'pointermove')) {
+      const nowWake = Date.now();
+      if (nowWake - fs.lastWakeAt < 180) return;
+      fs.lastWakeAt = nowWake;
+    }
     fsEl.studio.classList.remove('fs-idle');
     if (fs.idleTimer) clearTimeout(fs.idleTimer);
     fs.idleTimer = setTimeout(() => {
       if (!fs.open) return;
+      // Android keeps :hover stuck after a tap — only trust it with a real mouse
       if (
-        fsEl.hudTop.matches(':hover') ||
-        fsEl.hudBottom.matches(':hover') ||
-        (fsEl.cinemaCloseBtn && fsEl.cinemaCloseBtn.matches(':hover'))
+        !isSmartOrTouchPanel &&
+        (fsEl.hudTop.matches(':hover') ||
+          fsEl.hudBottom.matches(':hover') ||
+          (fsEl.cinemaCloseBtn && fsEl.cinemaCloseBtn.matches(':hover')))
       ) {
         return;
       }
@@ -1914,9 +2021,13 @@
     // Pick smart initial fullscreen mode based on context
     if (src === 'world') {
       fs.mode = 'world-wall';
-    } else if (src === 'timer' && state.timerVisualMode && state.timerVisualMode !== 'ring') {
-      fs.mode = 'cinema';
-      fs.cinemaObject = state.timerVisualMode;
+    } else if (src === 'timer') {
+      if (state.timerVisualMode && state.timerVisualMode !== 'ring') {
+        fs.mode = 'cinema';
+        fs.cinemaObject = state.timerVisualMode;
+      } else {
+        fs.mode = 'giant';
+      }
     } else if (src === 'clock' && state.clockStyle === 'flip') {
       fs.mode = 'flip-saver';
     } else if (src === 'clock' && state.clockStyle === 'analog') {
@@ -1927,13 +2038,23 @@
 
     fs.open = true;
     fs.lastWorldRenderSec = -1;
-    fsEl.studio.classList.remove('hidden');
+    try {
+      window.scrollTo(0, 0);
+    } catch (_) {
+      /* noop */
+    }
+    syncViewportHeight();
+    // Synchroniser les modes UI et masquer l'arrière-plan AVANT de lever .hidden
+    // pour éviter tout glitch ou affichage furtif de la navbar du site ou du HUD
     syncFsControlsUI();
+    syncOverlayLock();
+    fsEl.studio.classList.remove('hidden');
     updateFullscreenStudioFrame();
     wakeFsHud();
+    if (fsCinemaEngine) fsCinemaEngine.refreshLayout();
 
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
+    if (!getFullscreenElement()) {
+      requestNativeFullscreen(document.documentElement);
     }
   }
 
@@ -1942,8 +2063,13 @@
     if (fs.idleTimer) clearTimeout(fs.idleTimer);
     fsEl.studio.classList.add('hidden');
     fsEl.studio.classList.remove('fs-idle');
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
+    syncOverlayLock();
+    if (getFullscreenElement() && !focus.open) {
+      fs.manualNativeToggle = true;
+      exitNativeFullscreen();
+      setTimeout(() => {
+        fs.manualNativeToggle = false;
+      }, 1500);
     }
   }
 
@@ -2185,7 +2311,7 @@
 
   // Instantiate Cinema Fullscreen Interactive Canvas Engine (960x795 Responsive Retina)
   if (window.InteractiveTimersEngine && fsEl.cinemaCanvas) {
-    new window.InteractiveTimersEngine(
+    fsCinemaEngine = new window.InteractiveTimersEngine(
       fsEl.cinemaCanvas,
       {
         getState: () => {
@@ -2269,6 +2395,23 @@
   // Event listeners for Fullscreen Studio
   if (fsEl.mainClockStage) {
     fsEl.mainClockStage.addEventListener('dblclick', () => openFullscreenStudio('clock'));
+    // Touch double-tap (Android WebViews on SMART Boards don't always emit dblclick)
+    let lastStageTap = 0;
+    fsEl.mainClockStage.addEventListener(
+      'touchend',
+      (e) => {
+        if (e.target && e.target.closest && e.target.closest('button, select, input, a')) return;
+        const nowTap = Date.now();
+        if (nowTap - lastStageTap < 350) {
+          lastStageTap = 0;
+          if (e.cancelable) e.preventDefault();
+          openFullscreenStudio('clock');
+        } else {
+          lastStageTap = nowTap;
+        }
+      },
+      { passive: false }
+    );
   }
   fsEl.launchBtns.forEach((btn) => {
     btn.addEventListener('click', () => openFullscreenStudio(btn.dataset.fsLaunch));
@@ -2278,7 +2421,7 @@
     fsEl.cinemaCloseBtn.addEventListener('click', closeFullscreenStudio);
   }
 
-  ['mousemove', 'mousedown', 'touchstart', 'keydown'].forEach((evt) => {
+  ['mousemove', 'pointermove', 'mousedown', 'touchstart', 'keydown'].forEach((evt) => {
     fsEl.studio.addEventListener(evt, wakeFsHud, { passive: true });
   });
 
@@ -2335,27 +2478,40 @@
   fsEl.themeCycleBtn.addEventListener('click', cycleTheme);
 
   fsEl.nativeToggleBtn.addEventListener('click', () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
+    if (!getFullscreenElement()) {
+      requestNativeFullscreen(document.documentElement);
     } else {
       fs.manualNativeToggle = true;
-      document.exitFullscreen().catch(() => {
+      exitNativeFullscreen();
+      setTimeout(() => {
         fs.manualNativeToggle = false;
-      });
+      }, 1500);
     }
   });
 
-  document.addEventListener('fullscreenchange', () => {
-    if (!document.fullscreenElement) {
+  function onNativeFullscreenChange() {
+    if (getFullscreenElement()) {
+      fs.enteredNativeAt = Date.now();
+    } else {
       if (fs.manualNativeToggle) {
         fs.manualNativeToggle = false;
-        return;
+      } else if (fs.open && !isSmartOrTouchPanel) {
+        // Desktop only: Esc exits both. On SMART Boards / Android, the OS (SMART Ink,
+        // floating toolbars, edge swipes) can drop immersive mode at any time —
+        // keep the in-page studio open instead of bouncing the user out.
+        const activeFor = Date.now() - (fs.enteredNativeAt || 0);
+        if (fs.enteredNativeAt && activeFor > 900) closeFullscreenStudio();
       }
-      if (fs.open) {
-        closeFullscreenStudio();
-      }
+      fs.enteredNativeAt = 0;
     }
-  });
+    if (fs.open && fsCinemaEngine) {
+      setTimeout(() => fsCinemaEngine.refreshLayout(), 120);
+      setTimeout(() => fsCinemaEngine.refreshLayout(), 350);
+    }
+  }
+
+  document.addEventListener('fullscreenchange', onNativeFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', onNativeFullscreenChange);
 
   /* ==========================================================================
      9C. HI-FI AUDIO MIXER (12 SOUNDS) & STREAMING (SPOTIFY / APPLE MUSIC / DEEZER)
@@ -2520,6 +2676,22 @@
     },
   ];
 
+  // Official SomaFM public Icecast mirrors (direct, no proxy). If one node is blocked or
+  // down, the browser's native <source> fallback tries the next within the same tap.
+  const SOMA_MIRRORS = ['ice1', 'ice4', 'ice6', 'ice2', 'ice5', 'ice3'];
+
+  function buildSomaStreams(channelId) {
+    return {
+      mp3: SOMA_MIRRORS.map((h) => `https://${h}.somafm.com/${channelId}-128-mp3`),
+      aac: SOMA_MIRRORS.map((h) => `https://${h}.somafm.com/${channelId}-128-aac`),
+      aac64: SOMA_MIRRORS.slice(0, 3).map((h) => `https://${h}.somafm.com/${channelId}-64-aac`),
+    };
+  }
+
+  LIVE_RADIOS.forEach((st) => {
+    st.streams = buildSomaStreams(st.id);
+  });
+
   const STREAM_CURATED = {
     spotify: [
       {
@@ -2637,6 +2809,9 @@
     radioLivePill: document.getElementById('stream-radio-live-pill'),
     radioVol: document.getElementById('stream-radio-vol'),
     radioAudio: document.getElementById('stream-radio-audio'),
+    radioStatusBox: document.getElementById('stream-radio-status-box'),
+    radioStatusText: document.getElementById('stream-radio-status-text'),
+    radioWebPlayerLink: document.getElementById('stream-radio-webplayer-link'),
   };
 
   const audioStudio = {
@@ -2652,6 +2827,10 @@
     radioCodec: 'mp3', // 'mp3' | 'aac'
     radioMirrorIdx: 0,
     radioPlaying: false,
+    radioLoading: false,
+    radioError: false,
+    radioReqId: 0,
+    radioWatchdog: null,
     loginPollTimer: null,
   };
 
@@ -3050,7 +3229,7 @@
       btn.addEventListener('click', () => {
         audioStudio.radioStationId = st.id;
         audioStudio.radioMirrorIdx = 0;
-        playBuiltInRadio(st, 0);
+        playBuiltInRadio(st);
       });
       audioEl.radioStations.appendChild(btn);
     });
@@ -3073,7 +3252,9 @@
     }
 
     if (audioEl.radioPlayBtn) {
-      audioEl.radioPlayBtn.textContent = audioStudio.radioPlaying
+      audioEl.radioPlayBtn.textContent = audioStudio.radioLoading
+        ? t('audio.stream.radioConnecting', { station: activeSt.stationName })
+        : audioStudio.radioPlaying
         ? t('audio.stream.radioPause', { station: activeSt.stationName })
         : t('audio.stream.radioPlay', { station: activeSt.stationName });
     }
@@ -3084,43 +3265,166 @@
     syncRadioNowPlayingStrip();
   }
 
-  function playBuiltInRadio(station = getActiveRadioObj(), mirrorIdx = 0) {
-    if (!audioEl.radioAudio || !station) return;
-    audioStudio.radioMirrorIdx = mirrorIdx;
-    const directUrl = getDirectSomaFmUrl(station, audioStudio.radioCodec, mirrorIdx);
-    if (audioEl.radioAudio.src !== directUrl) {
-      audioEl.radioAudio.src = directUrl;
+  function playBuiltInRadio(station = getActiveRadioObj()) {
+    const audio = audioEl.radioAudio;
+    if (!audio || !station) return;
+
+    // Everything below runs synchronously inside the user tap so Android Chrome/WebView
+    // keeps the user activation: the native player walks the <source> fallbacks itself.
+    const reqId = ++audioStudio.radioReqId;
+    audioStudio.radioStationId = station.id;
+    audioStudio.radioMirrorIdx = 0;
+    audioStudio.radioLoading = true;
+    audioStudio.radioError = false;
+    audioStudio.radioPlaying = false;
+
+    try {
+      audio.pause();
+    } catch (_) {
+      /* noop */
     }
-    audioEl.radioAudio.volume = (parseInt(audioEl.radioVol.value, 10) || 70) / 100;
-    audioEl.radioAudio
-      .play()
-      .then(() => {
-        audioStudio.radioPlaying = true;
-        renderRadioStations();
-        syncAudioStudioUI();
-      })
-      .catch(() => {
-        const fmt = audioStudio.radioCodec === 'aac' ? 'aac' : 'mp3';
-        const mirrors = (station.streams && station.streams[fmt]) || [];
-        if (mirrorIdx + 1 < mirrors.length) {
-          playBuiltInRadio(station, mirrorIdx + 1);
-          return;
-        }
+    audio.removeAttribute('src');
+    while (audio.firstChild) audio.removeChild(audio.firstChild);
+
+    const preferred = audioStudio.radioCodec === 'aac' ? 'aac' : 'mp3';
+    const alternate = preferred === 'aac' ? 'mp3' : 'aac';
+    const mime = { mp3: 'audio/mpeg', aac: 'audio/aac', aac64: 'audio/aac' };
+    const order = [preferred, alternate, 'aac64'];
+    const sources = [];
+    order.forEach((fmt) => {
+      ((station.streams && station.streams[fmt]) || []).forEach((url) => {
+        const src = document.createElement('source');
+        src.src = url;
+        src.type = mime[fmt];
+        audio.appendChild(src);
+        sources.push(src);
+      });
+    });
+    const lastSource = sources[sources.length - 1];
+    if (lastSource) {
+      lastSource.addEventListener('error', () => {
+        if (reqId === audioStudio.radioReqId) failRadio(station);
+      });
+    }
+
+    try {
+      audio.volume = (parseInt(audioEl.radioVol.value, 10) || 70) / 100;
+    } catch (_) {
+      /* Some Android WebViews make volume read-only */
+    }
+
+    setRadioStatus(t('audio.stream.radioConnecting', { station: station.stationName }), false, station);
+    renderRadioStations();
+    syncAudioStudioUI();
+
+    audio.load();
+    let playResult;
+    try {
+      playResult = audio.play();
+    } catch (_) {
+      playResult = null;
+    }
+    if (playResult && typeof playResult.catch === 'function') {
+      playResult.catch((err) => {
+        if (reqId !== audioStudio.radioReqId) return;
+        if (err && err.name === 'AbortError') return; // superseded by a newer load()
+        failRadio(station);
+      });
+    }
+
+    clearTimeout(audioStudio.radioWatchdog);
+    audioStudio.radioWatchdog = setTimeout(() => {
+      if (reqId === audioStudio.radioReqId && audioStudio.radioLoading && !audioStudio.radioPlaying) {
+        failRadio(station);
+      }
+    }, 12000);
+  }
+
+  function setRadioStatus(text, isError, station = getActiveRadioObj()) {
+    if (!audioEl.radioStatusBox) return;
+    audioEl.radioStatusBox.classList.toggle('hidden', !text);
+    audioEl.radioStatusBox.classList.toggle('is-error', Boolean(isError));
+    if (audioEl.radioStatusText) audioEl.radioStatusText.textContent = text || '';
+    if (audioEl.radioWebPlayerLink) {
+      audioEl.radioWebPlayerLink.classList.toggle('hidden', !isError);
+      audioEl.radioWebPlayerLink.href = `https://somafm.com/player/#/now-playing/${station.id}`;
+    }
+  }
+
+  function failRadio(station) {
+    clearTimeout(audioStudio.radioWatchdog);
+    audioStudio.radioLoading = false;
+    audioStudio.radioPlaying = false;
+    audioStudio.radioError = true;
+    try {
+      audioEl.radioAudio.pause();
+    } catch (_) {
+      /* noop */
+    }
+    setRadioStatus(t('audio.stream.radioError'), true, station);
+    renderRadioStations();
+    syncAudioStudioUI();
+  }
+
+  function stopBuiltInRadio() {
+    audioStudio.radioReqId++;
+    clearTimeout(audioStudio.radioWatchdog);
+    audioStudio.radioLoading = false;
+    audioStudio.radioPlaying = false;
+    audioStudio.radioError = false;
+    if (audioEl.radioAudio) {
+      try {
+        audioEl.radioAudio.pause();
+      } catch (_) {
+        /* noop */
+      }
+    }
+    setRadioStatus('', false);
+    renderRadioStations();
+    syncAudioStudioUI();
+  }
+
+  // Real media state (Android/Icecast can fail after play() already resolved)
+  if (audioEl.radioAudio) {
+    const ra = audioEl.radioAudio;
+    ra.addEventListener('playing', () => {
+      clearTimeout(audioStudio.radioWatchdog);
+      audioStudio.radioLoading = false;
+      audioStudio.radioPlaying = true;
+      audioStudio.radioError = false;
+      setRadioStatus('', false);
+      renderRadioStations();
+      syncAudioStudioUI();
+    });
+    ra.addEventListener('waiting', () => {
+      if (!audioStudio.radioPlaying) return;
+      setRadioStatus(t('audio.stream.radioBuffering'), false);
+    });
+    ra.addEventListener('canplay', () => {
+      if (audioStudio.radioPlaying) setRadioStatus('', false);
+    });
+    ra.addEventListener('pause', () => {
+      if (audioStudio.radioLoading) return;
+      if (audioStudio.radioPlaying) {
         audioStudio.radioPlaying = false;
         renderRadioStations();
         syncAudioStudioUI();
-      });
+      }
+    });
+    ra.addEventListener('stalled', () => {
+      if (audioStudio.radioPlaying) setRadioStatus(t('audio.stream.radioBuffering'), false);
+    });
+    ra.addEventListener('error', () => {
+      if (audioStudio.radioLoading || audioStudio.radioPlaying) failRadio(getActiveRadioObj());
+    });
   }
 
   function toggleBuiltInRadio() {
     if (!audioEl.radioAudio) return;
-    if (audioStudio.radioPlaying) {
-      audioEl.radioAudio.pause();
-      audioStudio.radioPlaying = false;
-      renderRadioStations();
-      syncAudioStudioUI();
+    if (audioStudio.radioPlaying || audioStudio.radioLoading) {
+      stopBuiltInRadio();
     } else {
-      playBuiltInRadio(getActiveRadioObj(), 0);
+      playBuiltInRadio(getActiveRadioObj());
     }
   }
 
@@ -3323,8 +3627,8 @@
         if (audioStudio.radioCodec === nextCodec) return;
         audioStudio.radioCodec = nextCodec;
         audioStudio.radioMirrorIdx = 0;
-        if (audioStudio.radioPlaying) {
-          playBuiltInRadio(getActiveRadioObj(), 0);
+        if (audioStudio.radioPlaying || audioStudio.radioLoading) {
+          playBuiltInRadio(getActiveRadioObj());
         } else {
           renderRadioStations();
         }
@@ -3334,7 +3638,11 @@
   if (audioEl.radioVol) {
     audioEl.radioVol.addEventListener('input', () => {
       if (audioEl.radioAudio) {
-        audioEl.radioAudio.volume = (parseInt(audioEl.radioVol.value, 10) || 0) / 100;
+        try {
+          audioEl.radioAudio.volume = (parseInt(audioEl.radioVol.value, 10) || 0) / 100;
+        } catch (_) {
+          /* read-only volume on some Android WebViews */
+        }
       }
     });
   }

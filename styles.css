@@ -594,15 +594,38 @@ html,
 body {
   min-height: 100vh;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background-color: var(--bg);
   color: var(--text-primary);
   transition: background-color 0.35s ease, color 0.35s ease;
   overflow-x: hidden;
 }
 
+html {
+  background-color: var(--bg);
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   display: flex;
   flex-direction: column;
+  position: relative;
+  background-color: transparent;
+}
+
+html.overlay-lock,
+html.overlay-lock body {
+  overflow: hidden !important;
+  height: var(--app-height, 100vh);
+  overscroll-behavior: none;
+}
+
+/* En mode plein écran ou concentration : élimination totale des glitchs graphiques
+   en retirant la navbar, le contenu et l'arrière-plan du compositeur matériel */
+html.overlay-lock .topbar,
+html.overlay-lock .main-container,
+html.overlay-lock .app-footer,
+html.overlay-lock .ambient-bg {
+  display: none !important;
+  visibility: hidden !important;
 }
 
 button,
@@ -627,49 +650,59 @@ button {
    ========================================================================== */
 .ambient-bg {
   position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  transform: translateZ(0);
 }
 
+/* Soft radial glows: same look as blur(110px) but with zero GPU blur pass (4K ARM panels) */
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(110px);
-  opacity: 0.36;
+  opacity: 0.42;
   transition: background 0.6s ease;
   animation: floatOrb 22s infinite alternate ease-in-out;
+  will-change: transform;
 }
 
 .orb-1 {
-  width: 520px;
-  height: 520px;
-  background: var(--orb-1);
-  top: -140px;
-  left: -120px;
+  width: 760px;
+  height: 760px;
+  background: radial-gradient(circle, var(--orb-1) 0%, transparent 68%);
+  top: -260px;
+  left: -240px;
 }
 
 .orb-2 {
-  width: 480px;
-  height: 480px;
-  background: var(--orb-2);
-  bottom: -140px;
-  right: -100px;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, var(--orb-2) 0%, transparent 68%);
+  bottom: -250px;
+  right: -210px;
   animation-delay: -7s;
 }
 
 .orb-3 {
-  width: 380px;
-  height: 380px;
-  background: var(--orb-3);
-  top: 40%;
-  left: 55%;
+  width: 580px;
+  height: 580px;
+  background: radial-gradient(circle, var(--orb-3) 0%, transparent 68%);
+  top: calc(40% - 100px);
+  left: calc(55% - 100px);
   animation-delay: -13s;
 }
 
 .grid-overlay {
   position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   inset: 0;
   background-image: radial-gradient(var(--border) 1px, transparent 1px);
   background-size: 32px 32px;
@@ -2784,20 +2817,20 @@ kbd {
 }
 
 .fs-hud {
-  transition: opacity 0.45s ease, transform 0.45s ease;
+  transition: opacity 0.28s ease;
   z-index: 10;
 }
 
 .fs-studio.fs-idle .fs-hud-top {
   opacity: 0;
   pointer-events: none;
-  transform: translateY(-14px);
+  transform: none;
 }
 
 .fs-studio.fs-idle .fs-hud-bottom {
   opacity: 0;
   pointer-events: none;
-  transform: translateY(14px);
+  transform: none;
 }
 
 .fs-hud-top {
@@ -2933,8 +2966,13 @@ kbd {
 
 /* Mode 3: Interactive Cinema (Minimalist Medium Digital + Giant Interactive) */
 .fs-studio[data-fs-mode="cinema"] .fs-hud-top,
-.fs-studio[data-fs-mode="cinema"] .fs-hud-bottom {
+.fs-studio[data-fs-mode="cinema"] .fs-hud-bottom,
+.fs-studio[data-fs-mode="cinema"] #fs-hud-top,
+.fs-studio[data-fs-mode="cinema"] #fs-hud-bottom {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 #fs-view-cinema {
@@ -2986,14 +3024,12 @@ kbd {
 }
 
 #fs-interactive-canvas {
-  aspect-ratio: 320 / 265;
-  height: min(77vh, 76vw);
-  width: auto;
-  max-width: 95vw;
+  display: block;
+  flex-shrink: 0;
   background: transparent;
   border: none;
   box-shadow: none;
-  filter: drop-shadow(0 28px 55px rgba(0, 0, 0, 0.42));
+  filter: none !important;
   touch-action: none;
   user-select: none;
 }
@@ -4155,14 +4191,7 @@ kbd {
 /* ==========================================================================
    Responsive Design
    ========================================================================== */
-@media (max-width: 920px) {
-  .pomodoro-layout,
-  .timers-layout,
-  .stopwatch-layout,
-  .contact-layout {
-    grid-template-columns: 1fr;
-  }
-
+@media (max-width: 1120px) {
   .topbar {
     flex-wrap: wrap;
     padding: 0.75rem 1rem;
@@ -4175,13 +4204,24 @@ kbd {
     overflow-x: auto;
   }
 
-  .nav-tab span:not(.nav-pill) {
-    display: none;
-  }
-
   .nav-tab {
     flex: 1;
     justify-content: center;
+  }
+}
+
+@media (max-width: 860px) {
+  .nav-tab span:not(.nav-pill) {
+    display: none;
+  }
+}
+
+@media (max-width: 920px) {
+  .pomodoro-layout,
+  .timers-layout,
+  .stopwatch-layout,
+  .contact-layout {
+    grid-template-columns: 1fr;
   }
 
   .fs-analog-meta {
@@ -4205,5 +4245,198 @@ kbd {
 
   .contact-form-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   SMART Board (MX / GX Plus Android) & Touch Panel Compatibility
+   ========================================================================== */
+
+/* Content paints above the fixed ambient layer (z-index: 0) without new stacking contexts */
+.main-container,
+.app-footer {
+  position: relative;
+}
+
+/* Legacy Chromium (< 87) has no `inset` support: explicit edges */
+.ring-center-content,
+.timer-stage-wrapper[data-visual="ring"] .timer-readout-dock,
+.audio-drawer-backdrop {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+/* Full-viewport overlays: stable height while Android URL/system bars animate */
+.fs-studio,
+.focus-overlay {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  height: var(--app-height, 100vh);
+  animation: overlayFadeIn 0.22s ease both;
+  transform: none;
+  overscroll-behavior: contain;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Interactive canvas: sized in px by JS, no costly drop-shadow on a 60fps canvas */
+#fs-interactive-canvas {
+  display: block;
+  flex-shrink: 0;
+  aspect-ratio: auto;
+  filter: none !important;
+  max-width: none;
+  max-height: none;
+}
+
+.fs-cinema-close-btn {
+  min-width: 46px;
+  min-height: 46px;
+}
+
+/* Stable digits (no horizontal jitter on every tick) */
+.nav-pill,
+.digital-readout,
+.flip-value,
+.pomo-time-display,
+.sw-display,
+.wc-time,
+.mwc-time,
+.mt-time,
+.focus-giant-readout,
+.fs-giant-digits,
+.fs-flip-val,
+.fs-cinema-digits,
+.fs-analog-digital,
+.fs-world-main-time,
+.fs-wall-time,
+.fs-oled-time {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Touch ergonomics */
+button,
+a,
+select,
+input,
+summary,
+.mini-world-card,
+.clock-stage {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button,
+.topbar,
+.clock-stage,
+.fs-studio,
+.focus-overlay {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* SomaFM connection / error status */
+.stream-radio-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.stream-radio-status.is-error {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.45);
+  color: #fca5a5;
+}
+
+.stream-radio-status a {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+/* ---- Touch panels (SMART Boards, Android, coarse pointers) ---- */
+html.smart-touch-panel .orb {
+  animation: none;
+  will-change: auto;
+}
+
+/* No backdrop blur stacks on 4K Mali/ARM GPUs (cause of tile flicker) */
+html.smart-touch-panel .topbar,
+html.smart-touch-panel .glass-card,
+html.smart-touch-panel .header-menu-popover,
+html.smart-touch-panel .audio-drawer,
+html.smart-touch-panel .audio-drawer-backdrop {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html.smart-touch-panel .topbar,
+html.smart-touch-panel .audio-drawer {
+  background: var(--bg-secondary);
+}
+
+html.smart-touch-panel .glass-card {
+  background: var(--bg-secondary);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+html.smart-touch-panel .header-menu-popover {
+  background: var(--bg-secondary);
+  animation: none;
+}
+
+html.smart-touch-panel .audio-drawer-backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+html.smart-touch-panel .tab-panel {
+  animation: overlayFadeIn 0.2s ease;
+}
+
+/* Sticky :hover after a finger/pen tap: neutralize movement */
+html.smart-touch-panel button:hover,
+html.smart-touch-panel a:hover,
+html.smart-touch-panel .theme-option:hover,
+html.smart-touch-panel .mini-world-card:hover {
+  transform: none !important;
+}
+
+@media (hover: none) {
+  button:hover,
+  a:hover,
+  .theme-option:hover {
+    transform: none !important;
   }
 }

@@ -43,25 +43,79 @@ class InteractiveTimersEngine {
   }
 
   setupCanvas() {
+    if (this.responsive) {
+      this.refreshLayout();
+      let resizeTimer = null;
+      const schedule = () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => this.refreshLayout(), 120);
+      };
+      window.addEventListener('resize', schedule);
+      window.addEventListener('orientationchange', schedule);
+      document.addEventListener('fullscreenchange', schedule);
+      document.addEventListener('webkitfullscreenchange', schedule);
+      return;
+    }
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const scaleX = this.displayWidth / this.width;
     const scaleY = this.displayHeight / this.height;
     this.canvas.width = Math.round(this.displayWidth * dpr);
     this.canvas.height = Math.round(this.displayHeight * dpr);
-    if (!this.responsive) {
-      this.canvas.style.width = `${this.displayWidth}px`;
-      this.canvas.style.height = `${this.displayHeight}px`;
-    }
+    this.canvas.style.width = `${this.displayWidth}px`;
+    this.canvas.style.height = `${this.displayHeight}px`;
     this.ctx.setTransform(dpr * scaleX, 0, 0, dpr * scaleY, 0, 0);
+  }
+
+  /** Exact 320:265 sizing in CSS px (no aspect-ratio reliance) + capped backing store for 4K ARM panels. */
+  refreshLayout() {
+    if (!this.canvas || !this.ctx || !this.responsive) return;
+    const vw = window.innerWidth || document.documentElement.clientWidth || 1024;
+    const vh = window.innerHeight || document.documentElement.clientHeight || 768;
+    const availW = Math.max(240, vw * 0.92);
+    const availH = Math.max(200, vh * 0.74);
+    const scale = Math.min(availW / this.width, availH / this.height);
+    const cssW = Math.round(this.width * scale);
+    const cssH = Math.round(this.height * scale);
+    this.canvas.style.setProperty('width', `${cssW}px`, 'important');
+    this.canvas.style.setProperty('height', `${cssH}px`, 'important');
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const bufW = Math.min(1120, Math.round(cssW * dpr));
+    const bufH = Math.round((bufW * this.height) / this.width);
+    if (this.canvas.width !== bufW) this.canvas.width = bufW;
+    if (this.canvas.height !== bufH) this.canvas.height = bufH;
+    this.ctx.setTransform(bufW / this.width, 0, 0, bufH / this.height, 0, 0);
+  }
+
+  /** Cross-browser rounded rectangle path (ctx.roundRect requires Chromium 99+). */
+  roundRectPath(ctx, x, y, w, h, radii) {
+    if (typeof ctx.roundRect === 'function') {
+      ctx.roundRect(x, y, w, h, radii);
+      return;
+    }
+    let r = Array.isArray(radii) ? radii : [radii];
+    if (r.length === 1) r = [r[0], r[0], r[0], r[0]];
+    else if (r.length === 2) r = [r[0], r[1], r[0], r[1]];
+    else if (r.length === 3) r = [r[0], r[1], r[2], r[1]];
+    const max = Math.min(w, h) / 2;
+    const [tl, tr, br, bl] = r.map((v) => Math.max(0, Math.min(Number(v) || 0, max)));
+    ctx.moveTo(x + tl, y);
+    ctx.lineTo(x + w - tr, y);
+    ctx.arcTo(x + w, y, x + w, y + tr, tr);
+    ctx.lineTo(x + w, y + h - br);
+    ctx.arcTo(x + w, y + h, x + w - br, y + h, br);
+    ctx.lineTo(x + bl, y + h);
+    ctx.arcTo(x, y + h, x, y + h - bl, bl);
+    ctx.lineTo(x, y + tl);
+    ctx.arcTo(x, y, x + tl, y, tl);
+    ctx.closePath();
   }
 
   getCanvasCoords(e) {
     const rect = this.canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const src = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e;
     return {
-      x: ((clientX - rect.left) / rect.width) * this.width,
-      y: ((clientY - rect.top) / rect.height) * this.height,
+      x: ((src.clientX - rect.left) / (rect.width || 1)) * this.width,
+      y: ((src.clientY - rect.top) / (rect.height || 1)) * this.height,
     };
   }
 
@@ -110,13 +164,81 @@ class InteractiveTimersEngine {
       this.dragMode = null;
     };
 
-    this.canvas.addEventListener('mousemove', onMove);
-    this.canvas.addEventListener('mousedown', onDown);
-    window.addEventListener('mouseup', onUp);
+    // Pointer Events (SMART Boards / Android / pen / mouse) — one unified stream, no ghost clicks.
+    if ('PointerEvent' in window) {
+      this.activePointerId = null;
+      this.canvas.style.touchAction = 'none';
+      this.canvas.addEventListener('pointerdown', (e) => {
+        if (e.button !== undefined && e.button > 0) return;
+        this.activePointerId = e.pointerId;
+        try {
+          this.canvas.setPointerCapture(e.pointerId);
+        } catch (_) {
+          /* noop */
+        }
+        onDown(e);
+      });
+      this.canvas.addEventListener('pointermove', (e) => {
+        if (this.activePointerId !== null && e.pointerId !== this.activePointerId) return;
+        onMove(e);
+      });
+      const end = (e) => {
+        if (this.activePointerId !== null && e.pointerId !== this.activePointerId) return;
+        this.activePointerId = null;
+        onUp();
+      };
+      this.canvas.addEventListener('pointerup', end);
+      this.canvas.addEventListener('pointercancel', (e) => {
+        if (this.activePointerId !== null && e.pointerId !== this.activePointerId) return;
+        this.activePointerId = null;
+        this.pointer.down = false;
+        this.dragMode = null;
+      });
+      this.canvas.addEventListener('pointerleave', (e) => {
+        if (e.pointerType === 'mouse') this.pointer.inside = false;
+      });
+      return;
+    }
 
-    this.canvas.addEventListener('touchstart', onDown, { passive: true });
-    this.canvas.addEventListener('touchmove', onMove, { passive: false });
-    window.addEventListener('touchend', onUp);
+    // Legacy fallback: ignore synthetic mouse events emitted after a touch (prevents double toggle).
+    this.lastTouchTime = 0;
+    const isGhostMouse = () => Date.now() - this.lastTouchTime < 600;
+
+    this.canvas.addEventListener('mousemove', (e) => {
+      if (!isGhostMouse()) onMove(e);
+    });
+    this.canvas.addEventListener('mousedown', (e) => {
+      if (!isGhostMouse()) onDown(e);
+    });
+    window.addEventListener('mouseup', () => {
+      if (!isGhostMouse()) onUp();
+    });
+
+    this.canvas.addEventListener(
+      'touchstart',
+      (e) => {
+        this.lastTouchTime = Date.now();
+        onDown(e);
+      },
+      { passive: true }
+    );
+    this.canvas.addEventListener(
+      'touchmove',
+      (e) => {
+        this.lastTouchTime = Date.now();
+        onMove(e);
+      },
+      { passive: false }
+    );
+    window.addEventListener('touchend', () => {
+      this.lastTouchTime = Date.now();
+      onUp();
+    });
+    window.addEventListener('touchcancel', () => {
+      this.lastTouchTime = Date.now();
+      this.pointer.down = false;
+      this.dragMode = null;
+    });
 
     this.canvas.addEventListener('mouseleave', () => {
       this.pointer.inside = false;
@@ -324,7 +446,7 @@ class InteractiveTimersEngine {
 
     ctx.fillStyle = waxGrad;
     ctx.beginPath();
-    ctx.roundRect(cx - w / 2, topY, w, candleH, [8, 8, 6, 6]);
+    this.roundRectPath(ctx, cx - w / 2, topY, w, candleH, [8, 8, 6, 6]);
     ctx.fill();
 
     // Top melted wax pool ellipse
@@ -344,7 +466,7 @@ class InteractiveTimersEngine {
     drips.forEach((d) => {
       if (d.len > 6) {
         ctx.beginPath();
-        ctx.roundRect(cx + d.dx - 3, topY + 3, 6, d.len, 3);
+        this.roundRectPath(ctx, cx + d.dx - 3, topY + 3, 6, d.len, 3);
         ctx.fill();
         ctx.beginPath();
         ctx.arc(cx + d.dx, topY + 3 + d.len, 4, 0, Math.PI * 2);
@@ -562,8 +684,8 @@ class InteractiveTimersEngine {
     // Top & bottom wooden caps
     ctx.fillStyle = '#b45309';
     ctx.beginPath();
-    ctx.roundRect(-58, -98, 116, 12, 6);
-    ctx.roundRect(-58, 86, 116, 12, 6);
+    this.roundRectPath(ctx, -58, -98, 116, 12, 6);
+    this.roundRectPath(ctx, -58, 86, 116, 12, 6);
     ctx.fill();
 
     // Side brass pillars
@@ -851,7 +973,7 @@ class InteractiveTimersEngine {
 
     ctx.fillStyle = '#c2410c';
     ctx.beginPath();
-    ctx.roundRect(cx - 46, soilY - 4, 92, 10, 4);
+    this.roundRectPath(ctx, cx - 46, soilY - 4, 92, 10, 4);
     ctx.fill();
   }
 }

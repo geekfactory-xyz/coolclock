@@ -1059,8 +1059,12 @@
           </div>
         </div>
 
+        <div class="stream-radio-status hidden" id="stream-radio-status-box" role="status" aria-live="polite">
+          <span id="stream-radio-status-text"></span>
+          <a id="stream-radio-webplayer-link" href="https://somafm.com/player/#/now-playing/groovesalad" target="_blank" rel="noopener noreferrer" class="ghost-sm-btn stream-ext-link hidden" data-i18n="audio.stream.radioWebPlayer">↗ Lecteur web SomaFM</a>
+        </div>
+
         <p class="stream-radio-terms" data-i18n-html="audio.stream.radioTermsHtml">Diffusion non commerciale et sans publicité via <a href="https://somafm.com" target="_blank" rel="noopener noreferrer">somafm.com</a>.</p>
-        <audio id="stream-radio-audio" preload="none"></audio>
       </div>
 
       <!-- SECTION B: SPOTIFY / APPLE MUSIC / DEEZER -->
@@ -1148,6 +1152,9 @@
       <span data-i18n="common.openSourceBtn">Projet Open-Source</span>
     </a>
   </footer>
+
+  <!-- Top-level HTML5 Audio Element (kept outside hidden drawers for Android / SMART Board WebView playback reliability) -->
+  <audio id="stream-radio-audio" preload="none" playsinline webkit-playsinline></audio>
 
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   <script src="audio.js"></script>
